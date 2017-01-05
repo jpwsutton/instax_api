@@ -20,12 +20,12 @@ def printByteArray(byteArray):
     return(' '.join(hexString[i:i+4] for i in range(0, len(hexString), 4)))
 
 
-def generatePayload(commandBit, mysteryInt, payloadArray, password):
+def generatePayload(commandBit, packetLength, payloadArray, password):
     payload = bytearray() # The Command Packet is always 12 bytes
     payload.append(36 & 0xFF) # We always start with 36
     payload.append(commandBit & 0xFF) # Command Bit?
-    payload.append((mysteryInt >> 8) & 0xFF) # Something else
-    payload.append(mysteryInt & 0xFF) # Something else
+    payload.append((packetLength >> 8) & 0xFF) # Something else
+    payload.append(packetLength & 0xFF) # Something else
     payload.append((payloadArray[0] >> 24) & 0xFF) # Something else
     payload.append((payloadArray[1] >> 16) & 0xFF) # Something else
     payload.append((payloadArray[2] >> 8) & 0xFF) # Something else

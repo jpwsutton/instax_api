@@ -1,0 +1,17 @@
+import instax
+
+print("Instax SP-2 Example App")
+myInstax = instax.SP2()
+myInstax.connect()
+print('--------------------------------------------------')
+myInstax.getPrinterVersion()
+print('--------------------------------------------------')
+myInstax.getPrinterModel()
+print('--------------------------------------------------')
+myInstax.getCmd193()
+print('--------------------------------------------------')
+myInstax.getCmd79()
+print('--------------------------------------------------')
+#myInstax.sendPayload()
+myInstax.close()
+print('--------------------------------------------------')
