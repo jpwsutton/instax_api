@@ -1,4 +1,6 @@
 from .utilities  import Utilities
+from .response import Response, ResponseCode, PrinterStatus
+
 
 class Commands:
     """Command Processing Class
@@ -10,12 +12,6 @@ class Commands:
     def __init__(self):
         self.utilities = Utilities()
         pass
-
-    """Test Command"""
-    def getTestCommand(self):
-        #return bytearray.fromhex('2ac0 0014 e759 eede 0457 0000 f700 0027 fad7 0d0a')
-        return bytearray.fromhex('24c0 0010 e759 eede ffff 0000 fa01 0d0a')
-
 
 
     def generateCommand(self, currentTimeMillis, commandType, extraPayload, extraPayloadLength, pinCode):
@@ -60,11 +56,13 @@ class Commands:
 
 
 
-    def verifyResponse(self, byteArray, currentTimeMillis, commandType):
+    def processResponse(self, byteArray, currentTimeMillis, commandType):
         """ Takes a response byteArray and verifies that it matches
             the correct currentTimeMillis, commandType and has a
-            valid checksum.
+            valid checksum. Will return a response Object containing
+            the raw payload, and the response codes.
         """
+
         startByte = (byteArray[0] & 0xFF)
         cmdByte = (byteArray[1] &0xFF)
         packetLength = ((byteArray[2] &0xFF) << 8 | (byteArray[3] &0xFF) << 0)
@@ -72,17 +70,34 @@ class Commands:
         commandTimePacked = self.getCurrentTimeByteArray(currentTimeMillis)
         commandTime = ((commandTimePacked[0] &0xFF) << 24 | (commandTimePacked[1] &0xFF) << 16 | (commandTimePacked[2] &0xFF) << 8 | (commandTimePacked[3] &0xFF) << 0)
         returnCode = (byteArray[12] & 0xFF)
-        print('Returncode was: %s' % returnCode)
-        #print('Start Byte: %s' % startByte)
-        #print('Command Byte: %s' % cmdByte)
-        #print('Response Length: %s' % packetLength)
-        #print('Response Time: %s' % responseTime)
-        #print('Command Time: %s' % commandTime)
-        #print('Return Code: %s' % returnCode)
         if((startByte == 42) and (responseTime == commandTime) and (commandType == cmdByte) and (len(byteArray) == packetLength) and (self.validateEndOfPayload(byteArray, packetLength))):
-            return True
+            # The payload is technically valid, extract the payload appropriately
+            if(cmdByte == 79):
+                paylaod = self.command79Processor(byteArray)
+            elif(cmdByte == 80):
+                # No Payload
+                payload = {}
+            elif(cmdByte == 81):
+                payload = self.command81Processor(byteArray)
+            elif(cmdByte == 82):
+                payload = self.command82Processor(byteArray)
+            elif(cmdByte == 176):
+                payload = self.command176Processor(byteArray)
+            elif(cmdByte == 182):
+                payload = self.command182Processor(byteArray)
+            elif(cmdByte == 192):
+                payload = self.command192Processor(byteArray)
+            elif(cmdByte == 193):
+                payload = self.command193Processor(byteArray)
+            elif(cmdByte == 194):
+                payload = self.command194Processor(byteArray)
+            elif(cmdByte == 196):
+                payload = self.command196Processor(byteArray)
+            response = Response(byteArray, payload,ResponseCode.RET_OK, PrinterStatus.IDLE, )
         else:
-            return False
+            response = Response(byteArray, NULL, ResponseCode.E_RCV_FRAME, PrinterStatus.IDLE)
+
+        return response
 
 
 
@@ -105,57 +120,106 @@ class Commands:
             return False
 
 
+    def command79Processor(self, byteArray):
+        """
+        Command 79 - Return Printer Specifications
+        """
+        maxHeight  = self.utilities.getTwoByteInt(0, byteArray)
+        maxWidth   = self.utilities.getTwoByteInt(2, byteArray)
+        maxColours = self.utilities.getTwoByteInt(4, byteArray)
+        unknown1   = self.utilities.getTwoByteInt(6, byteArray)
+        maxMsgSize = self.utilities.getTwoByteInt(12, byteArray)
+        unknown2   = self.utilities.getOneByteInt(14, byteArray)
+        unknown3   = self.utilities.getFourByteInt(16, byteArray)
+        payload = {
+            'maxHeight' : maxHeight,
+            'maxWidth'  : maxWidth,
+            'maxColours': maxColours,
+            'unknown1'  : unknown1,
+            'maxMsgSize': maxMsgSize,
+            'unknown2'  : unknown2,
+            'unknown3'  : unknown3
+        }
+        return payload
 
-    #Command 193... something to do with facebook...
-    def command193Processor(self, byteArray):
-        firstValue = self.utilities.getFourByteInt(0, byteArray)
-        facebookValue = self.utilities.getOneByteIntAt15(byteArray)
-        print('FirstValue: %s ' % firstValue)
-        print('Facebook: %s' % facebookValue)
+    def command81Processor(byteArray):
+        """
+        Command 81 - Prepare for Image
+        """
+        maxImageSize = self.utilities.getTwoByteInt(2, byteArray)
+        payload = {
+            'maxImageSize' : maxImageSize
+        }
+        return payload
 
+    # Command 82 - Send Image
+    def command82Processor(byteArray):
+        payload = {}
+        return payload
 
-    #Command 192
+    # Command 176 - Lock / Unlock Printer
+    def command176Processor(byteArray):
+        payload = {}
+        return payload
+
+    # Command 182 - Send Image
+    def command182Processor(byteArray):
+        payload = {}
+        return payload
+
     def command192Processor(self, byteArray):
+        """
+        Command 192 - Firmware / Hardware Version
+        """
         printerFirmwareVersion = self.utilities.getTwoByteInt(2, byteArray)
         printerHardwareVersion = self.utilities.getTwoByteInt(4, byteArray)
         mysteryUnusedInt = self.utilities.getTwoByteInt(0, byteArray)
-        print('Getting Cmd 192 ints..')
-        print('Printer Firmware Version: Ver %s' % self.utilities.formatVersionNumber(printerFirmwareVersion))
-        print('Printer Hardware Version: Ver %s' % self.utilities.formatVersionNumber(printerHardwareVersion))
+        payload = {
+            'firmwareVer' : self.utilities.formatVersionNumber(printerFirmwareVersion),
+            'hardwareVer' : self.utilities.formatVersionNumber(printerHardwareVersion)
+        }
+        return payload
 
-    #Command 194
+    def command193Processor(self, byteArray):
+        """
+        Command 193 - Print Count
+        """
+        printCount = self.utilities.getFourByteInt(0, byteArray)
+        battLevel = self.utilities.getOneByteIntAt15(byteArray)
+        payload = {
+            'battLevel' : battLevel,
+            'printCount' : printCount
+        }
+        return payload
+
     def command194Processor(self, byteArray):
+        """
+        Command 194 - Model Name
+        """
         printerModel = self.utilities.getPrinterModelString(byteArray)
-        print('The Printer Model is: %s' % printerModel)
+        payload = {
+            'modelName' : printerModel
+        }
+        return payload
 
-
-
-    #Command 196
+    # Command 196 -Unknown
     def command196Processor(byteArray):
-        print('Getting Cmd 196 ints..')
-        print(getTwoByteInt(2, byteArray))
+        unknown = getTwoByteInt(2, byteArray)
+        payload = {
+            'unknown' : unknown
+        }
+        return payload
 
-
-    #Command 79
-    def command79Processor(self, byteArray):
-        print('Getting Cmd 79 ints..')
-        print(self.utilities.getTwoByteInt(0, byteArray))
-        print(self.utilities.getTwoByteInt(2, byteArray))
-        print(self.utilities.getTwoByteInt(4, byteArray))
-        print(self.utilities.getTwoByteInt(6, byteArray))
-        print(self.utilities.getTwoByteInt(12, byteArray))
-        print(self.utilities.getOneByteInt(14, byteArray))
-        print(self.utilities.getFourByteInt(16, byteArray))
-
-
-    #Command 198
+    # Command 198 - Unknown
     def command198Processor(byteArray):
-        print('Getting Cmd 198 ints..')
-        print(getTwoByteInt(0, byteArray))
-        print(getOneByteInt(2, byteArray))
-        print(getOneByteInt(3, byteArray))
-        print(getTwoByteInt(4, byteArray))
-
-    def command81Processor(byteArray):
-        print('Getting Cmd 81 ints..')
-        print()
+        unknown1 = getTwoByteInt(0, byteArray)
+        unknown2 = getOneByteInt(2, byteArray)
+        unknown3 = getOneByteInt(3, byteArray)
+        unknown4 = getTwoByteInt(4, byteArray)
+        payload = {
+            '1' : unknown1,
+            '2' : unknown2,
+            '3' : unknown3,
+            '4' : unknown4,
+        }
+        return payload

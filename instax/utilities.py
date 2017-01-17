@@ -31,7 +31,7 @@ class Utilities:
 
     def printByteArray(self, byteArray):
         hexString = ''.join('%02x'%i for i in byteArray)
-        return(' '.join(hexString[i:i+4] for i in range(0, len(hexString), 4)))
+        return(' '.join(hexString[i:i+2] for i in range(0, len(hexString), 2)))
 
     def abv16Check(self, byteArray):
         if(len(byteArray) > 16):

@@ -88,7 +88,6 @@ class SocketClientThread(threading.Thread):
             self.reply_q.put(self._error_reply(str(e)))
 
     def _handle_RECEIVE(self, cmd):
-        print("Receiving....")
         try:
             header_data = self._recv_n_bytes(4)
             if len(header_data) == 4:
