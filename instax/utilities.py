@@ -5,23 +5,29 @@ class Utilities:
         pass
 
     def getFourByteInt(self, offset, byteArray):
-        if(len(byteArray) < (16 + offset + 4)):
+        if(len(byteArray) < (offset + 4)):
             return 0
         else:
-            return (((byteArray[16+offset] & 0xFF)<< 24) | ((byteArray[(16+offset) + 1 ] & 0xFF) << 16)| ((byteArray[(16+offset) + 2 ] & 0xFF) << 8)| ((byteArray[(16+offset) + 3 ] & 0xFF) << 0))
+            return (((byteArray[offset] & 0xFF)<< 24) | ((byteArray[(offset) + 1 ] & 0xFF) << 16)| ((byteArray[(offset) + 2 ] & 0xFF) << 8)| ((byteArray[(offset) + 3 ] & 0xFF) << 0))
 
 
     def getTwoByteInt(self, offset, byteArray):
-        if(len(byteArray) < (16 + offset + 2)):
+        if(len(byteArray) < ( offset + 2)):
             return 0
         else:
-            return (((byteArray[16+offset] & 0xFF)<< 8) | ((byteArray[(16+offset) + 1 ] & 0xFF) << 0))
+            return (((byteArray[offset] & 0xFF)<< 8) | ((byteArray[(offset) + 1 ] & 0xFF) << 0))
 
     def getOneByteInt(self, offset, byteArray):
-        if(len(byteArray) < (16 + offset + 1)):
+        if(len(byteArray) < ( offset + 1)):
             return 0
         else :
-            return (byteArray[16 + offset] & 0xFF)
+            return (byteArray[ offset] & 0xFF)
+
+    def getEjecting(self, offset, byteArray):
+        if(len(byteArray)< (offset + 1)):
+            return 0
+        else :
+            return ((byteArray[offset] >> 2) & 0xFF)
 
     def getOneByteIntAt15(self, byteArray):
         if(len(byteArray) < 16):
@@ -57,7 +63,12 @@ class Utilities:
             return ''
         index = 0
         while(index < modelStringLength):
-            modelString += chr(byteArray[16 + index])
+            modelString += chr(byteArray[ index])
             index += 1
 
         return modelString
+
+
+    def getPayloadBytes(self, offset, length, byteArray):
+        print('End index: ' + str(offset + length))
+        return byteArray[offset:offset + length + 1]

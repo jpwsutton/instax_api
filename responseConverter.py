@@ -65,20 +65,26 @@ resp3       = bytearray.fromhex('2ac0 001c e759 eede 0000 0000 0000 0027 0101 01
 resp4       = bytearray.fromhex('2ac1 0024 e759 eede 0000 0000 0000 0027 0000 0003 00f3 c048 0000 1645 001e 0000 f946 0d0a')
 resp5       = bytearray.fromhex('2a4f 0030 e759 eede 0000 0000 0000 0027 0258 0320 0100 000a 0000 0000 ea60 1000 0000 0000 0000 0000 0000 0000 fa41 0d0a')
 
-print("Converting Payload: " + printByteArray(myByteArray))
-convertPayload(myByteArray)
+sndImage       = bytearray.fromhex('2a52001875b8bd8e000000000000003a00000002fcb70d0a')
+
+#print("Converting Payload: " + printByteArray(myByteArray))
+#convertPayload(myByteArray)
+
+#print()
+#print("Converting Payload: " + printByteArray(resp2))
+#convertPayload(resp2)
+
+# print()
+# print("Converting Payload: " + printByteArray(resp3))
+# convertPayload(resp3)
+# print()
+# print("Converting Payload: " + printByteArray(resp4))
+# convertPayload(resp4)
+#
+# print()
+# print("Converting Payload: " + printByteArray(resp5))
+# convertPayload(resp5)
 
 print()
-print("Converting Payload: " + printByteArray(resp2))
-convertPayload(resp2)
-
-print()
-print("Converting Payload: " + printByteArray(resp3))
-convertPayload(resp3)
-print()
-print("Converting Payload: " + printByteArray(resp4))
-convertPayload(resp4)
-
-print()
-print("Converting Payload: " + printByteArray(resp5))
-convertPayload(resp5)
+print("Converting SEND IMAGE Payload: " + printByteArray(sndImage))
+convertPayload(sndImage)
