@@ -10,12 +10,27 @@ class Utilities:
         else:
             return (((byteArray[offset] & 0xFF)<< 24) | ((byteArray[(offset) + 1 ] & 0xFF) << 16)| ((byteArray[(offset) + 2 ] & 0xFF) << 8)| ((byteArray[(offset) + 3 ] & 0xFF) << 0))
 
+    def encodeFourByteInt(self, numberToEncode):
+        fourByteInt = bytearray()
+        fourByteInt.append((numberToEncode >> 24) & 0xFF) # B1
+        fourByteInt.append((numberToEncode >> 16) & 0xFF) # B2
+        fourByteInt.append((numberToEncode >> 8) & 0xFF)  # B3
+        fourByteInt.append((numberToEncode >> 0) & 0xFF)  # B4
+        return fourByteInt
+
 
     def getTwoByteInt(self, offset, byteArray):
         if(len(byteArray) < ( offset + 2)):
             return 0
         else:
             return (((byteArray[offset] & 0xFF)<< 8) | ((byteArray[(offset) + 1 ] & 0xFF) << 0))
+
+    def encodeTwoByteInt(self, numberToEncode):
+        twoByteInt = bytearray()
+        twoByteInt.append((numberToEncode >> 8) & 0xFF) # B1
+        twoByteInt.append((numberToEncode >> 0) & 0xFF) # B2
+        return twoByteInt
+
 
     def getOneByteInt(self, offset, byteArray):
         if(len(byteArray) < ( offset + 1)):

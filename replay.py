@@ -1,4 +1,4 @@
-import instax
+#import instax
 import binascii
 import sys
 print("Instax Packet Capture Replay...")
@@ -8,11 +8,17 @@ print("Instax Packet Capture Replay...")
     to the console showing the contents of the messages.
 '''
 
-#filename = "packet_captures/test3/cmd_79_80"
-filename = "packet_captures/test3/cmd_51_52_image"
+filename = "packet_captures/test3/cmd_79_80"
+#filename = "packet_captures/test3/cmd_51_52_image"
 
 print('Reading: ' + filename)
 
+def printByteArray(byteArray):
+    hexString = ''.join('%02x'%i for i in byteArray)
+    data = ' '.join(hexString[i:i+4] for i in range(0, len(hexString), 4))
+    #info = (data[:80] + '..') if len(data) > 80 else data
+    info = data
+    return(info)
 
 
 
@@ -42,6 +48,7 @@ def getMessages(filename):
 
 messages = getMessages(filename)
 
-packetFactory = instax.PacketFactory()
+#packetFactory = instax.PacketFactory()
 for msg in messages:
-    packet = packetFactory.getPacket(msg)
+    #packet = packetFactory.getPacket(msg)
+    print(printByteArray(msg))

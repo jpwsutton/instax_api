@@ -5,6 +5,7 @@ import queue
 from .exceptions import CommandTimedOutException, ConnectError, CommandError
 from .utilities import Utilities
 from .response import Response, ResponseCode, PrinterStatus
+from .packet import Packet, SpecificationsCommand
 
 
 class SP2:
@@ -20,6 +21,7 @@ class SP2:
         self.currentTimeMillis = int(round(time.time() * 1000))
         self.pinCode = 1111
         print('currentTimeMillis %s ' % self.currentTimeMillis)
+        self.packetFactory = PacketFactory()
 
     def connect(self, ip='192.168.0.251', port=8080, timeout=10):
         print("Connecting to Instax SP-2 with timeout of: " + str(timeout))
@@ -105,9 +107,10 @@ class SP2:
 
     def getPrinterSpecifications(self):
         print("Getting printer specification... 79")
-        getPrinterSpecs = self.commands.generateCommand(self.currentTimeMillis, 79, None, 0, self.pinCode)
-        print("Sending: ", self.utilities.printByteArray(getPrinterSpecs))
-        reply = self.send_and_recieve(getPrinterSpecs, 5)
+        cmdPacket = SpecificationsCommand(PacketFactory.MESSAGE_MODE_COMMAND)
+        encodedPacket = self.packetFactory.encodeCommand(cmdPacket, self.currentTimeMillis, self.pinCode)
+        print("Sending: ", self.utilities.printByteArray(encodedPacket))
+        reply = self.send_and_recieve(commandPayload, 5)
         print("Response: ", self.utilities.printByteArray(reply.data))
         response = self.commands.processResponse(
             reply.data, self.currentTimeMillis, 79)
