@@ -29,7 +29,6 @@ class PacketFactory(object):
         # Get first two bytes as they will help identify the type of packet
         self.mode = byteArray[0]
         pType = byteArray[1]
-        print("Type: " + str(pType))
 
         # Identify the type of packet and hand over to that packets class
         if pType == self.MESSAGE_TYPE_SPECIFICATIONS:
@@ -93,12 +92,13 @@ class Packet(object):
         pass
 
     def printByteArray(self, byteArray):
-        hexString = ''.join('%02x'%i for i in byteArray)
+        hexString = ''.join('%02x' % i for i in byteArray)
         data = ' '.join(hexString[i:i+4] for i in range(0, len(hexString), 4))
         info = (data[:80] + '..') if len(data) > 80 else data
         return(info)
 
     def printDebug(self):
+        """Print Debug information about packet."""
         print("-------------------------------------------------------------")
         print("Bytes: %s" % (self.printByteArray(self.byteArray)))
         print("Mode:  %s" % (self.strings[self.mode]))
@@ -111,7 +111,7 @@ class Packet(object):
         print('    Session Time:', self.header['sessionTime'])
         if(self.mode == self.MESSAGE_MODE_COMMAND):
             print('    Password:', self.header['password'])
-        elif(self.mode ==self.MESSAGE_MODE_RESPONSE):
+        elif(self.mode == self.MESSAGE_MODE_RESPONSE):
             print('    Return Code:', self.header['returnCode'])
             print('    Unknown 1:', self.header['unknown1'])
             print('    Ejecting:', self.header['ejecting'])
@@ -123,13 +123,17 @@ class Packet(object):
             print("Payload:")
             for key in self.payload:
                 if(key == 'payloadBytes'):
-                    print('    ', key, ': (length: ' + str(len(self.payload[key])) + ') : ' + self.printByteArray(self.payload[key]));
+                    print('    ',
+                          key,
+                          ': (length: ' + str(len(self.payload[key])) + ') : ',
+                          self.printByteArray(self.payload[key]))
                 else:
                     print('    ', key, ':', self.payload[key])
         print("-------------------------------------------------------------")
         print()
 
     def decodeHeader(self, mode, byteArray):
+        """Decode packet header."""
         startByte = self.utilities.getOneByteInt(0, byteArray)
         cmdByte = self.utilities.getOneByteInt(1, byteArray)
         packetLength = self.utilities.getTwoByteInt(2, byteArray)
@@ -156,8 +160,10 @@ class Packet(object):
         return header
 
     def validatePacket(self, byteArray, packetLength):
-        """ Validates that a payload ends correctly by
-            checking the end bytes and the checksum.
+        """
+        Validate that a payload ends correctly.
+
+        This is done by checking the end bytes and the checksum.
         """
         try:
             checkSumIndex = 0
@@ -165,9 +171,12 @@ class Packet(object):
             while(checkSumIndex < (packetLength - 4)):
                 checkSum += (byteArray[checkSumIndex] & 0xFF)
                 checkSumIndex += 1
-            if ((byteArray[checkSumIndex + 2] == 13) and (byteArray[checkSumIndex + 3] == 10)):
-                expectedCheckByte = (checkSum + (((byteArray[checkSumIndex] & 0xFF) << 8 ) |((byteArray[checkSumIndex+1] & 0xFF) << 0)))
-                if (expectedCheckByte & 65535) == 65535:
+            if ((byteArray[checkSumIndex + 2] == 13) and
+               (byteArray[checkSumIndex + 3] == 10)):
+                expectedCB = (checkSum +
+                              (((byteArray[checkSumIndex] & 0xFF) << 8)
+                               | ((byteArray[checkSumIndex+1] & 0xFF) << 0)))
+                if (expectedCB & 65535) == 65535:
                     return True
                 else:
                     return False
@@ -177,9 +186,9 @@ class Packet(object):
             print("Unexpected Error validating packet: " + str(type(ex)))
             print(ex.args)
             print(ex)
-            print("Expected Length: %s" % (packetLength))
-            print("Actual Length:   %s" % ( str(len(byteArray))))
-            print("Final 4 bytes:   %s" % (self.printByteArray(byteArray[-4:])) )
+            print("Expected:      %s" % (packetLength))
+            print("Actual:        %s" % (str(len(byteArray))))
+            print("Final 4 bytes: %s" % (self.printByteArray(byteArray[-4:])))
 
     def generateCommand(self, mode, cmdType, sessionTime, payload, pinCode):
         """ Takes Command arguments and packs them into a byteArray to be
@@ -209,23 +218,27 @@ class Packet(object):
         commandPayload.append(10)
         return commandPayload
 
-
     def generateResponse(self, mode, cmdType, sessionTime, payload, returnCode, ejectState):
         """ Takes Response arguments and packs them into a byteArray to be
             sent to the Instax-SP2
         """
         self.encodedSessionTime = self.utilities.getFourByteInt(0,self.utilities.encodeFourByteInt(sessionTime))
-        responsePayloadLength = 16 + len(payload)
+        responsePayloadLength = 20 + len(payload)
         responsePayload = bytearray()
-        responsePayload.append(mode & 0xFF) # Start of payload is 42
-        responsePayload.append(cmdType & 0xFF) # The Response type bytes
+        responsePayload.append(mode & 0xFF)  # Start of payload is 42
+        responsePayload.append(cmdType & 0xFF)  # The Response type bytes
         responsePayload = responsePayload + self.utilities.encodeTwoByteInt(responsePayloadLength)
         responsePayload = responsePayload + self.utilities.encodeFourByteInt(sessionTime)
-        responsePayload.append(0) # Nothing
-        responsePayload.append(0) # Nothing
-        responsePayload.append(0) # Nothing
-        responsePayload.append(0) # Nothing
+        responsePayload.append(0)  # Nothing
+        responsePayload.append(0)  # Nothing
+        responsePayload.append(0)  # Nothing
+        responsePayload.append(0)  # Nothing
+        responsePayload = responsePayload + self.utilities.encodeOneByteInt(returnCode)
+        responsePayload.append(0)  # Nothing
+        responsePayload = responsePayload + self.utilities.encodeEjecting(0)
+        responsePayload = responsePayload + self.utilities.encodeOneByteInt(39)
 
+        print("Payload length: ", len(payload))
         if(len(payload) > 0):
             responsePayload = responsePayload + payload
         # Generating the Checksum & End of payload
@@ -240,105 +253,141 @@ class Packet(object):
         responsePayload.append(10)
         return responsePayload
 
-
-
-
     def encodeCommand(self, sessionTime, pinCode):
-        """ Encodes a command packet into a byteArray
-        """
-        print("Encoding command: " + self.NAME + ", sessionTime: " + str(sessionTime) + ", pinCode: " + str(pinCode))
-        payload = self.encodeCommandPayload()
-        encodedPacket = self.generateCommand(self.mode, self.TYPE, sessionTime, payload, pinCode)
+        """Encode a command packet into a byteArray."""
+        payload = self.encodeComPayload()
+        encodedPacket = self.generateCommand(self.mode, self.TYPE,
+                                             sessionTime, payload, pinCode)
         return encodedPacket
 
     def encodeResponse(self, sessionTime, returnCode, ejectState):
-        """ Encodes a response packet into a byteArray
-        """
-        print("Encoding response: " + self.NAME + ", sessionTime: " + str(sessionTime) + ", returnCode: " + str(returnCode)+ ", ejectState: " + str(ejectState))
-        payload = self.encodeResponsePayload()
-        encodedPacket = self.generateResponse(self.mode, self.TYPE, sessionTime, payload, returnCode, ejectState)
+        """Encode a response packet into a byteArray."""
+        payload = self.encodeRespPayload()
+        encodedPacket = self.generateResponse(self.mode, self.TYPE,
+                                              sessionTime, payload,
+                                              returnCode, ejectState)
         return encodedPacket
 
 
-
-
-
-
-
 class SpecificationsCommand(Packet):
-    NAME= "Specs"
+    """Specifications Command and Response."""
 
+    NAME = "Specifications"
+    TYPE = Packet.MESSAGE_TYPE_SPECIFICATIONS
 
-    def __init__(self,mode, byteArray=None, height=800, width=600, colours=None, unknown1=None, maxSize=None, unknown2=None, unknown3=None):
-        #super(SubClass,self).__init__( x )
+    def __init__(self, mode, byteArray=None, maxHeight=800, maxWidth=600,
+                 maxColours=256, unknown1=None, maxMsgSize=None, unknown2=None,
+                 unknown3=None):
+        """Initialise the Packet."""
         super(SpecificationsCommand, self).__init__(mode)
-        self.NAME = "Specifications"
-        self.TYPE = Packet.MESSAGE_TYPE_SPECIFICATIONS
         self.payload = {}
-        self.mode=mode
+        self.mode = mode
 
         if (byteArray is not None):
             self.byteArray = byteArray
-            self.header = super(SpecificationsCommand, self).decodeHeader(mode,byteArray)
-            self.valid = self.validatePacket(byteArray, self.header['packetLength'])
+            self.header = super(SpecificationsCommand,
+                                self).decodeHeader(mode, byteArray)
+            self.valid = self.validatePacket(byteArray,
+                                             self.header['packetLength'])
             if(mode == self.MESSAGE_MODE_COMMAND):
-                self.decodedCommandPayload = self.decodeCommandPayload(byteArray)
+                self.decodedCommandPayload = self.decodeComPayload(byteArray)
             elif(mode == self.MESSAGE_MODE_RESPONSE):
-                self.payload = self.decodeResponse(byteArray)
-            super(SpecificationsCommand, self).printDebug()
+                self.payload = self.decodeRespPayload(byteArray)
         else:
             self.mode = mode
+            self.maxHeight = maxHeight
+            self.maxWidth = maxWidth
+            self.maxColours = maxColours
+            self.unknown1 = unknown1
+            self.unknown2 = unknown2
+            self.unknown3 = unknown3
+            self.maxMsgSize = maxMsgSize
 
-    def encodeCommandPayload(self):
-        # This command does not have a payload
+    def encodeComPayload(self):
+        """Encode Command payload.
+
+        This command does not have a payload, pass.
+        """
         return {}
 
+    def decodeComPayload(self, byteArray):
+        """Decode Command payload.
 
-    def decodeCommandPayload(self, byteArray):
-        # This command does not have a payload
+        This command does not have a payload, pass.
+        """
         return {}
 
-    def encodeResponsePayload(self):
-        return {}
+    def encodeRespPayload(self):
+        """Encode Response payload."""
+        payload = bytearray()
+        payload = payload + self.utilities.encodeTwoByteInt(self.maxWidth)
+        payload = payload + self.utilities.encodeTwoByteInt(self.maxHeight)
+        payload = payload + self.utilities.encodeTwoByteInt(self.maxColours)
+        payload = payload + self.utilities.encodeTwoByteInt(self.unknown1)
+        payload.append(0)  # Nothing
+        payload.append(0)  # Nothing
+        payload.append(0)  # Nothing
+        payload.append(0)  # Nothing
+        payload = payload + self.utilities.encodeTwoByteInt(self.maxMsgSize)
+        payload = payload + self.utilities.encodeOneByteInt(self.unknown2)
+        payload.append(0)  # Nothing
+        payload = payload + self.utilities.encodeFourByteInt(self.unknown3)
+        payload.append(0)  # Nothing
+        payload.append(0)  # Nothing
+        payload.append(0)  # Nothing
+        payload.append(0)  # Nothing
+        payload.append(0)  # Nothing
+        payload.append(0)  # Nothing
+        payload.append(0)  # Nothing
+        payload.append(0)  # Nothing
+        return payload
 
-    def decodeResponse(self, byteArray):
-        self.maxHeight  = self.utilities.getTwoByteInt(16, byteArray)
-        self.maxWidth   = self.utilities.getTwoByteInt(18, byteArray)
+    def decodeRespPayload(self, byteArray):
+        """Decode Response payload."""
+        self.maxWidth = self.utilities.getTwoByteInt(16, byteArray)
+        self.maxHeight = self.utilities.getTwoByteInt(18, byteArray)
         self.maxColours = self.utilities.getTwoByteInt(20, byteArray)
-        self.unknown1   = self.utilities.getTwoByteInt(22, byteArray)
+        self.unknown1 = self.utilities.getTwoByteInt(22, byteArray)
         self.maxMsgSize = self.utilities.getTwoByteInt(28, byteArray)
-        self.unknown2   = self.utilities.getOneByteInt(30, byteArray)
-        self.unknown3   = self.utilities.getFourByteInt(32, byteArray)
+        self.unknown2 = self.utilities.getOneByteInt(30, byteArray)
+        self.unknown3 = self.utilities.getFourByteInt(32, byteArray)
         self.payload = {
-            'maxHeight' : self.maxHeight,
-            'maxWidth'  : self.maxWidth,
+            'maxHeight': self.maxHeight,
+            'maxWidth': self.maxWidth,
             'maxColours': self.maxColours,
-            'unknown1'  : self.unknown1,
+            'unknown1': self.unknown1,
             'maxMsgSize': self.maxMsgSize,
-            'unknown2'  : self.unknown2,
-            'unknown3'  : self.unknown3
+            'unknown2': self.unknown2,
+            'unknown3': self.unknown3
         }
         return self.payload
 
 
 class ResetCommand(Packet):
-    NAME = "Reset"
+    """Reset Command."""
 
-    def __init__(self, mode, byteArray=None, returnCode=None, unknown1=None, ejecting=None, unknown2=None):
+    NAME = "Reset"
+    TYPE = Packet.MESSAGE_TYPE_RESET
+
+    def __init__(self, mode, byteArray=None, returnCode=None, unknown1=None,
+                 ejecting=None, unknown2=None):
+        """Initialise Reset Command Packet."""
         super(ResetCommand, self).__init__(mode)
         if (byteArray is not None):
-            self.header = super(ResetCommand, self).decodeHeader(mode, byteArray)
-            self.valid = self.validatePacket(byteArray, self.header['packetLength'])
+            self.byteArray = byteArray
+            self.header = super(ResetCommand,
+                                self).decodeHeader(mode, byteArray)
+            self.valid = self.validatePacket(byteArray,
+                                             self.header['packetLength'])
             if(mode == self.MESSAGE_MODE_COMMAND):
-                self.decodedCommandPayload = self.decodeCommand(byteArray)
-            elif(mode ==self.MESSAGE_MODE_RESPONSE):
-                self.decodedCommandPayload = self.decodeResponse(byteArray)
-            super(ResetCommand, self).printDebug(byteArray, mode, self.NAME, self.header, self.decodedCommandPayload)
+                self.decodedCommandPayload = self.decodeComPayload(byteArray)
+            elif(mode == self.MESSAGE_MODE_RESPONSE):
+                self.decodedCommandPayload = self.decodeRespPayload(byteArray)
         else:
-            print("Building new Reset Command")
+            self.mode = mode
 
 
-    def decodeCommand(self, byteArray):
+    def decodeComPayload(self, byteArray):
         # This command does not have a payload
         return {}
 
@@ -358,7 +407,7 @@ class PrepImageCommand(Packet):
                 self.decodedCommandPayload = self.decodeCommand(byteArray)
             elif(mode ==self.MESSAGE_MODE_RESPONSE):
                 self.decodedCommandPayload = self.decodeResponse(byteArray)
-            super(PrepImageCommand, self).printDebug(byteArray, mode, self.NAME, self.header, self.decodedCommandPayload)
+            #super(PrepImageCommand, self).printDebug(byteArray, mode, self.NAME, self.header, self.decodedCommandPayload)
         else:
             print("Building new Image Prepare Command")
 
@@ -394,7 +443,7 @@ class SendImageCommand(Packet):
                 self.decodedCommandPayload = self.decodeCommand(byteArray)
             elif(self.mode ==self.MESSAGE_MODE_RESPONSE):
                 self.decodedCommandPayload = self.decodeResponse(byteArray)
-            super(SendImageCommand, self).printDebug(byteArray, mode, self.NAME, self.header, self.decodedCommandPayload)
+            #super(SendImageCommand, self).printDebug(byteArray, mode, self.NAME, self.header, self.decodedCommandPayload)
         else:
             print("Building new Image Send Command")
 

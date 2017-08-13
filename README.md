@@ -18,6 +18,9 @@ Protocol Information: Check the [Wiki](https://github.com/jpwsutton/instax_api/w
 * Install packages from requirements.txt: `pip install -r requirements.txt --upgrade`.
 * When you are finished, just use `deactivate` to end your session.
 
+## Running tests
+Simply run the command: ´python3 tests_basic.py -v´
+
 
 ## Inspecting Packets in Wireshark
 * Useful filter: `tcp.port == 8080 && tcp.flags.push == 1`

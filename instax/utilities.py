@@ -1,19 +1,18 @@
 class Utilities:
 
     def __init__(self):
-        #do Nothing
         pass
 
     def getFourByteInt(self, offset, byteArray):
         if(len(byteArray) < (offset + 4)):
             return 0
         else:
-            return (((byteArray[offset] & 0xFF)<< 24) | ((byteArray[(offset) + 1 ] & 0xFF) << 16)| ((byteArray[(offset) + 2 ] & 0xFF) << 8)| ((byteArray[(offset) + 3 ] & 0xFF) << 0))
+            return (((byteArray[offset] & 0xFF) << 24) | ((byteArray[(offset) + 1] & 0xFF) << 16)| ((byteArray[(offset) + 2 ] & 0xFF) << 8)| ((byteArray[(offset) + 3 ] & 0xFF) << 0))
 
     def encodeFourByteInt(self, numberToEncode):
         fourByteInt = bytearray()
-        fourByteInt.append((numberToEncode >> 24) & 0xFF) # B1
-        fourByteInt.append((numberToEncode >> 16) & 0xFF) # B2
+        fourByteInt.append((numberToEncode >> 24) & 0xFF)  # B1
+        fourByteInt.append((numberToEncode >> 16) & 0xFF)  # B2
         fourByteInt.append((numberToEncode >> 8) & 0xFF)  # B3
         fourByteInt.append((numberToEncode >> 0) & 0xFF)  # B4
         return fourByteInt
@@ -38,11 +37,21 @@ class Utilities:
         else :
             return (byteArray[ offset] & 0xFF)
 
+    def encodeOneByteInt(self, numberToEncode):
+        oneByteInt = bytearray()
+        oneByteInt.append((numberToEncode >> 0) & 0xFF)
+        return oneByteInt
+
     def getEjecting(self, offset, byteArray):
         if(len(byteArray)< (offset + 1)):
             return 0
         else :
             return ((byteArray[offset] >> 2) & 0xFF)
+
+    def encodeEjecting(self, eject):
+        ejectState = bytearray()
+        ejectState.append((eject >> 2) & 0xFF)
+        return ejectState
 
     def getOneByteIntAt15(self, byteArray):
         if(len(byteArray) < 16):
@@ -83,7 +92,5 @@ class Utilities:
 
         return modelString
 
-
     def getPayloadBytes(self, offset, length, byteArray):
-        print('End index: ' + str(offset + length))
         return byteArray[offset:offset + length + 1]
