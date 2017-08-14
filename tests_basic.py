@@ -3,7 +3,7 @@ Instax SP2 Test File.
 
 @jpwsutton 2016/17
 """
-from instax import PacketFactory, Packet, SpecificationsCommand
+from instax import PacketFactory, Packet, SpecificationsCommand, VersionCommand
 import time
 import unittest
 
@@ -94,6 +94,26 @@ class PacketTests(unittest.TestCase):
         self.assertEqual(decodedPacket.payload['maxMsgSize'], 60000)
         self.assertEqual(decodedPacket.payload['unknown2'], 16)
         self.assertEqual(decodedPacket.payload['unknown3'], 0)
+
+    def test_encode_cmd_version(self):
+        """Test the process of encoding a spcecifications command."""
+        # Create Specifications Command Packet
+        sessionTime = int(round(time.time() * 1000))
+        pinCode = 1111
+        cmdPacket = VersionCommand(Packet.MESSAGE_MODE_COMMAND)
+        # Encode the command to raw byte array
+        encodedCommand = cmdPacket.encodeCommand(sessionTime, pinCode)
+        # Decode the command back into a packet object
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(encodedCommand)
+        # decodedPacket.printDebug()
+        postHeader = decodedPacket.header
+        self.helper_verify_header(postHeader,
+                                  Packet.MESSAGE_MODE_COMMAND,
+                                  Packet.MESSAGE_TYPE_PRINTER_VERSION,
+                                  len(encodedCommand),
+                                  cmdPacket.encodedSessionTime,
+                                  pinCode)
 
     def test_premade_resp_version(self):
         """Test Decoding a Version Response with an existing payload."""
