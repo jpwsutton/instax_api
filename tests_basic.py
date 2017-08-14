@@ -96,7 +96,7 @@ class PacketTests(unittest.TestCase):
         self.assertEqual(decodedPacket.payload['unknown3'], 0)
 
     def test_encode_cmd_version(self):
-        """Test the process of encoding a spcecifications command."""
+        """Test the process of encoding a version command."""
         # Create Specifications Command Packet
         sessionTime = int(round(time.time() * 1000))
         pinCode = 1111
@@ -114,6 +114,31 @@ class PacketTests(unittest.TestCase):
                                   len(encodedCommand),
                                   cmdPacket.encodedSessionTime,
                                   pinCode)
+
+    def test_encode_resp_version(self):
+        """Test the process of encoding a version response."""
+        sessionTime = int(round(time.time() * 1000))
+        resPacket = VersionCommand(Packet.MESSAGE_MODE_RESPONSE,
+                                   unknown1=254,
+                                   firmware=275,
+                                   hardware=0)
+        encodedResponse = resPacket.encodeResponse(sessionTime,
+                                                   Packet.RTN_E_RCV_FRAME,
+                                                   None)
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(encodedResponse)
+        # decodedPacket.printDebug()
+        postHeader = decodedPacket.header
+        self.helper_verify_header(postHeader,
+                                  Packet.MESSAGE_MODE_RESPONSE,
+                                  Packet.MESSAGE_TYPE_PRINTER_VERSION,
+                                  len(encodedResponse),
+                                  resPacket.encodedSessionTime)
+
+        # Verify Payload
+        self.assertEqual(decodedPacket.payload['unknown1'], 254)
+        self.assertEqual(decodedPacket.payload['firmware'], '01.13')
+        self.assertEqual(decodedPacket.payload['hardware'], '00.00')
 
     def test_premade_resp_version(self):
         """Test Decoding a Version Response with an existing payload."""
