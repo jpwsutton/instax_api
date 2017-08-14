@@ -17,9 +17,8 @@ class Utilities:
         fourByteInt.append((numberToEncode >> 0) & 0xFF)  # B4
         return fourByteInt
 
-
     def getTwoByteInt(self, offset, byteArray):
-        if(len(byteArray) < ( offset + 2)):
+        if(len(byteArray) < (offset + 2)):
             return 0
         else:
             return (((byteArray[offset] & 0xFF)<< 8) | ((byteArray[(offset) + 1 ] & 0xFF) << 0))

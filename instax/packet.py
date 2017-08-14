@@ -33,6 +33,8 @@ class PacketFactory(object):
         # Identify the type of packet and hand over to that packets class
         if pType == self.MESSAGE_TYPE_SPECIFICATIONS:
             return(SpecificationsCommand(mode=self.mode, byteArray=byteArray))
+        elif pType == self.MESSAGE_TYPE_PRINTER_VERSION:
+            return(VersionCommand(mode=self.mode, byteArray=byteArray))
         elif pType == self.MESSAGE_TYPE_RESET:
             return(ResetCommand(mode=self.mode, byteArray=byteArray))
         elif pType == self.MESSAGE_TYPE_PREP_IMAGE:
@@ -202,8 +204,8 @@ class Packet(object):
         commandPayload = commandPayload + self.utilities.encodeTwoByteInt(commandPayloadLength)
         commandPayload = commandPayload + self.utilities.encodeFourByteInt(sessionTime)
         commandPayload = commandPayload + self.utilities.encodeTwoByteInt(pinCode)
-        commandPayload.append(0) # Nothing
-        commandPayload.append(0) # Nothing
+        commandPayload.append(0)  # Nothing
+        commandPayload.append(0)  # Nothing
         if(len(payload) > 0):
             commandPayload = commandPayload + payload
         # Generating the Checksum & End of payload
@@ -218,11 +220,12 @@ class Packet(object):
         commandPayload.append(10)
         return commandPayload
 
-    def generateResponse(self, mode, cmdType, sessionTime, payload, returnCode, ejectState):
+    def generateResponse(self, mode, cmdType, sessionTime, payload, returnCode,
+                         ejectState):
         """ Takes Response arguments and packs them into a byteArray to be
             sent to the Instax-SP2
         """
-        self.encodedSessionTime = self.utilities.getFourByteInt(0,self.utilities.encodeFourByteInt(sessionTime))
+        self.encodedSessionTime = self.utilities.getFourByteInt(0, self.utilities.encodeFourByteInt(sessionTime))
         responsePayloadLength = 20 + len(payload)
         responsePayload = bytearray()
         responsePayload.append(mode & 0xFF)  # Start of payload is 42
@@ -238,7 +241,6 @@ class Packet(object):
         responsePayload = responsePayload + self.utilities.encodeEjecting(0)
         responsePayload = responsePayload + self.utilities.encodeOneByteInt(39)
 
-        print("Payload length: ", len(payload))
         if(len(payload) > 0):
             responsePayload = responsePayload + payload
         # Generating the Checksum & End of payload
@@ -361,6 +363,75 @@ class SpecificationsCommand(Packet):
             'unknown3': self.unknown3
         }
         return self.payload
+
+
+class VersionCommand(Packet):
+    """Version Command."""
+
+    NAME = "Version"
+    TYPE = Packet.MESSAGE_TYPE_PRINTER_VERSION
+
+    def __init__(self, mode, byteArray=None, unknown1=None, firmware=None,
+                 hardware=None):
+        """Initialise the packet."""
+        super(VersionCommand, self).__init__(mode)
+        self.payload = {}
+        self.mode = mode
+
+        if (byteArray is not None):
+            self.byteArray = byteArray
+            self.header = super(VersionCommand,
+                                self).decodeHeader(mode, byteArray)
+            self.valid = self.validatePacket(byteArray,
+                                             self.header['packetLength'])
+            if(mode == self.MESSAGE_MODE_COMMAND):
+                self.decodedCommandPayload = self.decodeComPayload(byteArray)
+            elif(mode == self.MESSAGE_MODE_RESPONSE):
+                self.payload = self.decodeRespPayload(byteArray)
+        else:
+            self.mode = mode
+            self.unknown1 = unknown1
+            self.firmware = firmware
+            self.hardware = hardware
+
+    def encodeComPayload(self):
+        """Encode Command payload.
+
+        This command does not have a payload, pass.
+        """
+        return {}
+
+    def decodeComPayload(self, byteArray):
+        """Decode Command payload.
+
+        This command does not have a payload, pass.
+        """
+        return {}
+
+    def encodeRespPayload(self):
+        """Encode Response payload."""
+        payload = bytearray()
+        payload = payload + self.utilities.encodeTwoByteInt(self.unknown1)
+        payload = payload + self.utilities.encodeTwoByteInt(self.firmware)
+        payload = payload + self.utilities.encodeTwoByteInt(self.hardware)
+        payload.append(0)  # Nothing
+        payload.append(0)  # Nothing
+        return payload
+
+    def decodeRespPayload(self, byteArray):
+        """Decode Response payload."""
+        self.unknown1 = self.utilities.getTwoByteInt(16, byteArray)
+        self.firmware = self.utilities.formatVersionNumber(
+                            self.utilities.getTwoByteInt(18, byteArray))
+        self.hardware = self.utilities.formatVersionNumber(
+                            self.utilities.getTwoByteInt(20, byteArray))
+        self.payload = {
+            'unknown1': self.unknown1,
+            'firmware': self.firmware,
+            'hardware': self.hardware
+        }
+        return self.payload
+
 
 
 class ResetCommand(Packet):

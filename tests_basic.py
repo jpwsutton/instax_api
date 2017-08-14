@@ -7,9 +7,6 @@ from instax import PacketFactory, Packet, SpecificationsCommand
 import time
 import unittest
 
-MESSAGE_MODE_COMMAND = 36  # Command from Client
-MESSAGE_MODE_RESPONSE = 42  # Response from Server
-
 
 class PacketTests(unittest.TestCase):
     """
@@ -26,7 +23,7 @@ class PacketTests(unittest.TestCase):
         self.assertEqual(header['cmdByte'], type)
         self.assertEqual(header['packetLength'], length)
         self.assertEqual(header['sessionTime'], time)
-        if direction == MESSAGE_MODE_COMMAND:
+        if direction == Packet.MESSAGE_MODE_COMMAND:
             self.assertEqual(header['password'], pin)
 
     def test_encode_cmd_specifications(self):
@@ -43,7 +40,7 @@ class PacketTests(unittest.TestCase):
         # decodedPacket.printDebug()
         postHeader = decodedPacket.header
         self.helper_verify_header(postHeader,
-                                  MESSAGE_MODE_COMMAND,
+                                  Packet.MESSAGE_MODE_COMMAND,
                                   Packet.MESSAGE_TYPE_SPECIFICATIONS,
                                   len(encodedCommand),
                                   cmdPacket.encodedSessionTime,
@@ -74,7 +71,7 @@ class PacketTests(unittest.TestCase):
                                   resPacket.encodedSessionTime)
 
         # Verify Payload
-        print(decodedPacket.payload)
+        # print(decodedPacket.payload)
         self.assertEqual(decodedPacket.payload['maxHeight'], 800)
         self.assertEqual(decodedPacket.payload['maxWidth'], 600)
         self.assertEqual(decodedPacket.payload['maxColours'], 256)
@@ -90,7 +87,24 @@ class PacketTests(unittest.TestCase):
                                 ' 0000 0000 0000 0000 fa41 0d0a')
         packetFactory = PacketFactory()
         decodedPacket = packetFactory.decode(msg)
-        # decodedPacket.printDebug()
+        self.assertEqual(decodedPacket.payload['maxHeight'], 800)
+        self.assertEqual(decodedPacket.payload['maxWidth'], 600)
+        self.assertEqual(decodedPacket.payload['maxColours'], 256)
+        self.assertEqual(decodedPacket.payload['unknown1'], 10)
+        self.assertEqual(decodedPacket.payload['maxMsgSize'], 60000)
+        self.assertEqual(decodedPacket.payload['unknown2'], 16)
+        self.assertEqual(decodedPacket.payload['unknown3'], 0)
+
+    def test_premade_resp_version(self):
+        """Test Decoding a Version Response with an existing payload."""
+        msg = bytearray.fromhex('2ac0 001c e759 eede 0000'
+                                ' 0000 0000 0027 0101 0113'
+                                ' 0000 0000 fbb0 0d0a')
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(msg)
+        self.assertEqual(decodedPacket.payload['unknown1'], 257)
+        self.assertEqual(decodedPacket.payload['firmware'], '01.13')
+        self.assertEqual(decodedPacket.payload['hardware'], '00.00')
 
 
 if __name__ == '__main__':

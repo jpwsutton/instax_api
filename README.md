@@ -19,7 +19,7 @@ Protocol Information: Check the [Wiki](https://github.com/jpwsutton/instax_api/w
 * When you are finished, just use `deactivate` to end your session.
 
 ## Running tests
-Simply run the command: ´python3 tests_basic.py -v´
+Simply run the command: `python3 tests_basic.py -v`
 
 
 ## Inspecting Packets in Wireshark
