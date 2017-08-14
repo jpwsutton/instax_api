@@ -1,6 +1,8 @@
 # instax_api
 An Api for the Fujifilm Instax SP-2 printer written in Python
 
+[![Build Status](https://travis-ci.org/jpwsutton/instax_api.svg?branch=master)](https://travis-ci.org/jpwsutton/instax_api)
+
 This is an experimental Python Module to interact and print photos to the Fujifilm Instax SP-2 printer.
 
 Currently there is nothing here yet as I'm still reverse engineering the protocol, so watch this space.
