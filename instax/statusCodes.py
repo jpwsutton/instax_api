@@ -11,16 +11,14 @@ class ResponseCode:
     """ The Current Response Code
     """
 
-    RET_HOLD, ST_UPDATE, E_OTHER_USED, E_NOT_IMAGE_DATA,
-     E_BATTERY_EMPTY, E_PRINTING, E_EJECTING, E_TESTING,
-      E_CHARGE, E_CONNECT, E_RCV_FRAME, E_FILM_EMPTY,
-       E_CAM_POINT, E_MOTOR, E_UNMATCH_PASS, E_PI_SENSOR,
-        E_RCV_FRAME = range(17)
+    (RET_HOLD, ST_UPDATE, E_OTHER_USED, E_NOT_IMAGE_DATA,
+        E_BATTERY_EMPTY, E_PRINTING, E_EJECTING, E_TESTING,
+        E_CHARGE, E_CONNECT, E_RCV_FRAME, E_FILM_EMPTY,
+        E_CAM_POINT, E_MOTOR, E_UNMATCH_PASS, E_PI_SENSOR,
+        E_RCV_FRAME) = range(17)
 
     def __init__(self, status):
         self.status = status
-
-
 
 
 """

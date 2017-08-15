@@ -4,4 +4,5 @@ python:
 # command to install dependencies
 install: "pip install -r requirements.txt"
 # command to run tests
-script: python tests_basic.py -v
+script: py.test --cov=instax tests_basic.py --doctest-modules --pep8 instax
+after_success: coveralls
