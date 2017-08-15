@@ -117,7 +117,8 @@ class Packet(object):
             print('    Return Code:', self.header['returnCode'])
             print('    Unknown 1:', self.header['unknown1'])
             print('    Ejecting:', self.header['ejecting'])
-            print('    Unkown 2:', self.header['unknown2'])
+            print('    Battery:', self.header['battery'])
+            print('    Prints Left:', self.header['printCount'])
 
         if len(self.payload) == 0:
             print("Payload: None")
@@ -155,7 +156,8 @@ class Packet(object):
             header['returnCode'] = self.utilities.getOneByteInt(12, byteArray)
             header['unknown1'] = self.utilities.getOneByteInt(13, byteArray)
             header['ejecting'] = self.utilities.getEjecting(14, byteArray)
-            header['unknown2'] = self.utilities.getOneByteInt(15, byteArray)
+            header['battery'] = self.utilities.getBatteryLevel(byteArray)
+            header['printCount'] = self.utilities.getPrintCount(byteArray)
 
         self.header = header
 
@@ -199,8 +201,8 @@ class Packet(object):
         self.encodedSessionTime = self.utilities.getFourByteInt(0,self.utilities.encodeFourByteInt(sessionTime))
         commandPayloadLength = 16 + len(payload)
         commandPayload = bytearray()
-        commandPayload.append(mode & 0xFF) # Start of payload is 36
-        commandPayload.append(cmdType & 0xFF) # The Command bytes
+        commandPayload.append(mode & 0xFF)  # Start of payload is 36
+        commandPayload.append(cmdType & 0xFF)  # The Command bytes
         commandPayload = commandPayload + self.utilities.encodeTwoByteInt(commandPayloadLength)
         commandPayload = commandPayload + self.utilities.encodeFourByteInt(sessionTime)
         commandPayload = commandPayload + self.utilities.encodeTwoByteInt(pinCode)
@@ -221,7 +223,7 @@ class Packet(object):
         return commandPayload
 
     def generateResponse(self, mode, cmdType, sessionTime, payload, returnCode,
-                         ejectState):
+                         ejectState, battery, printCount):
         """ Takes Response arguments and packs them into a byteArray to be
             sent to the Instax-SP2
         """
@@ -239,7 +241,7 @@ class Packet(object):
         responsePayload = responsePayload + self.utilities.encodeOneByteInt(returnCode)
         responsePayload.append(0)  # Nothing
         responsePayload = responsePayload + self.utilities.encodeEjecting(0)
-        responsePayload = responsePayload + self.utilities.encodeOneByteInt(39)
+        responsePayload = responsePayload + self.utilities.encodeBatteryAndPrintCount(battery, printCount)
 
         if(len(payload) > 0):
             responsePayload = responsePayload + payload
@@ -262,12 +264,14 @@ class Packet(object):
                                              sessionTime, payload, pinCode)
         return encodedPacket
 
-    def encodeResponse(self, sessionTime, returnCode, ejectState):
+    def encodeResponse(self, sessionTime, returnCode, ejectState, battery,
+                       printCount):
         """Encode a response packet into a byteArray."""
         payload = self.encodeRespPayload()
         encodedPacket = self.generateResponse(self.mode, self.TYPE,
                                               sessionTime, payload,
-                                              returnCode, ejectState)
+                                              returnCode, ejectState,
+                                              battery, printCount)
         return encodedPacket
 
 
@@ -393,6 +397,74 @@ class VersionCommand(Packet):
             self.unknown1 = unknown1
             self.firmware = firmware
             self.hardware = hardware
+
+    def encodeComPayload(self):
+        """Encode Command payload.
+
+        This command does not have a payload, pass.
+        """
+        return {}
+
+    def decodeComPayload(self, byteArray):
+        """Decode Command payload.
+
+        This command does not have a payload, pass.
+        """
+        return {}
+
+    def encodeRespPayload(self):
+        """Encode Response payload."""
+        payload = bytearray()
+        payload = payload + self.utilities.encodeTwoByteInt(self.unknown1)
+        payload = payload + self.utilities.encodeTwoByteInt(self.firmware)
+        payload = payload + self.utilities.encodeTwoByteInt(self.hardware)
+        payload.append(0)  # Nothing
+        payload.append(0)  # Nothing
+        return payload
+
+    def decodeRespPayload(self, byteArray):
+        """Decode Response payload."""
+        self.unknown1 = self.utilities.getTwoByteInt(16, byteArray)
+        self.firmware = self.utilities.formatVersionNumber(
+                            self.utilities.getTwoByteInt(18, byteArray))
+        self.hardware = self.utilities.formatVersionNumber(
+                            self.utilities.getTwoByteInt(20, byteArray))
+        self.payload = {
+            'unknown1': self.unknown1,
+            'firmware': self.firmware,
+            'hardware': self.hardware
+        }
+        return self.payload
+
+
+class PrintCountCommand(Packet):
+    """Print Count Command"""
+
+    NAME = "Print Count"
+    TYPE = Packet.MESSAGE_TYPE_PRINT_COUNT
+
+    def __init__(self, mode, byteArray=None, battery=None,
+                 availablePrints=None, printHistory=None):
+        """Initialise the packet."""
+        super(PrintCountCommand, self).__init__(mode)
+        self.payload = {}
+        self.mode = mode
+
+        if (byteArray is not None):
+            self.byteArray = byteArray
+            self.header = super(PrintCountCommand,
+                                self).decodeHeader(mode, byteArray)
+            self.valid = self.validatePacket(byteArray,
+                                             self.header['packetLength'])
+            if(mode == self.MESSAGE_MODE_COMMAND):
+                self.decodedCommandPayload = self.decodeComPayload(byteArray)
+            elif(mode == self.MESSAGE_MODE_RESPONSE):
+                self.payload = self.decodeRespPayload(byteArray)
+        else:
+            self.mode = mode
+            self.battery = battery
+            self.availablePrints = availablePrints
+            self.printHistory = printHistory
 
     def encodeComPayload(self):
         """Encode Command payload.

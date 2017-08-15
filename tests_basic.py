@@ -17,7 +17,8 @@ class PacketTests(unittest.TestCase):
     """
 
     def helper_verify_header(self, header, direction, type, length, time,
-                             pin=None):
+                             pin=None, returnCode=None, unknown1=None,
+                             ejecting=None, battery=None, printCount=None):
         """Verify the Header of a packet."""
         self.assertEqual(header['startByte'], direction)
         self.assertEqual(header['cmdByte'], type)
@@ -25,6 +26,12 @@ class PacketTests(unittest.TestCase):
         self.assertEqual(header['sessionTime'], time)
         if direction == Packet.MESSAGE_MODE_COMMAND:
             self.assertEqual(header['password'], pin)
+        if direction == Packet.MESSAGE_MODE_RESPONSE:
+            self.assertEqual(header['returnCode'], returnCode)
+            # self.assertEqual(header['unknown1'], unknown1)
+            self.assertEqual(header['ejecting'], ejecting)
+            self.assertEqual(header['battery'], battery)
+            self.assertEqual(header['printCount'], printCount)
 
     def test_encode_cmd_specifications(self):
         """Test the process of encoding a spcecifications command."""
@@ -49,6 +56,10 @@ class PacketTests(unittest.TestCase):
     def test_encode_resp_specifications(self):
         """Test the process of encoding a specifications response."""
         sessionTime = int(round(time.time() * 1000))
+        returnCode = Packet.RTN_E_RCV_FRAME
+        ejecting = 0
+        battery = 2
+        printCount = 7
         resPacket = SpecificationsCommand(Packet.MESSAGE_MODE_RESPONSE,
                                           maxHeight=800,
                                           maxWidth=600,
@@ -57,9 +68,9 @@ class PacketTests(unittest.TestCase):
                                           maxMsgSize=60000,
                                           unknown2=16,
                                           unknown3=0)
-        encodedResponse = resPacket.encodeResponse(sessionTime,
-                                                   Packet.RTN_E_RCV_FRAME,
-                                                   None)
+        encodedResponse = resPacket.encodeResponse(sessionTime, returnCode,
+                                                   ejecting, battery,
+                                                   printCount)
         packetFactory = PacketFactory()
         decodedPacket = packetFactory.decode(encodedResponse)
         # decodedPacket.printDebug()
@@ -68,7 +79,11 @@ class PacketTests(unittest.TestCase):
                                   Packet.MESSAGE_MODE_RESPONSE,
                                   Packet.MESSAGE_TYPE_SPECIFICATIONS,
                                   len(encodedResponse),
-                                  resPacket.encodedSessionTime)
+                                  resPacket.encodedSessionTime,
+                                  returnCode=returnCode,
+                                  ejecting=ejecting,
+                                  battery=battery,
+                                  printCount=printCount)
 
         # Verify Payload
         # print(decodedPacket.payload)
@@ -118,13 +133,17 @@ class PacketTests(unittest.TestCase):
     def test_encode_resp_version(self):
         """Test the process of encoding a version response."""
         sessionTime = int(round(time.time() * 1000))
+        returnCode = Packet.RTN_E_RCV_FRAME
+        ejecting = 0
+        battery = 2
+        printCount = 7
         resPacket = VersionCommand(Packet.MESSAGE_MODE_RESPONSE,
                                    unknown1=254,
                                    firmware=275,
                                    hardware=0)
-        encodedResponse = resPacket.encodeResponse(sessionTime,
-                                                   Packet.RTN_E_RCV_FRAME,
-                                                   None)
+        encodedResponse = resPacket.encodeResponse(sessionTime, returnCode,
+                                                   ejecting, battery,
+                                                   printCount)
         packetFactory = PacketFactory()
         decodedPacket = packetFactory.decode(encodedResponse)
         # decodedPacket.printDebug()
@@ -133,7 +152,11 @@ class PacketTests(unittest.TestCase):
                                   Packet.MESSAGE_MODE_RESPONSE,
                                   Packet.MESSAGE_TYPE_PRINTER_VERSION,
                                   len(encodedResponse),
-                                  resPacket.encodedSessionTime)
+                                  resPacket.encodedSessionTime,
+                                  returnCode=returnCode,
+                                  ejecting=ejecting,
+                                  battery=battery,
+                                  printCount=printCount)
 
         # Verify Payload
         self.assertEqual(decodedPacket.payload['unknown1'], 254)
@@ -147,6 +170,7 @@ class PacketTests(unittest.TestCase):
                                 ' 0000 0000 fbb0 0d0a')
         packetFactory = PacketFactory()
         decodedPacket = packetFactory.decode(msg)
+        # decodedPacket.printDebug()
         self.assertEqual(decodedPacket.payload['unknown1'], 257)
         self.assertEqual(decodedPacket.payload['firmware'], '01.13')
         self.assertEqual(decodedPacket.payload['hardware'], '00.00')

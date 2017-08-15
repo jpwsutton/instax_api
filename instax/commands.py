@@ -185,7 +185,7 @@ class Commands:
         Command 193 - Print Count
         """
         printCount = self.utilities.getFourByteInt(0, byteArray)
-        battLevel = self.utilities.getOneByteIntAt15(byteArray)
+        battLevel = self.utilities.getBatteryLevel(byteArray)
         payload = {
             'battLevel' : battLevel,
             'printCount' : printCount

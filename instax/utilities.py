@@ -55,11 +55,22 @@ class Utilities:
         ejectState.append((eject >> 2) & 0xFF)
         return ejectState
 
-    def getOneByteIntAt15(self, byteArray):
+    def getBatteryLevel(self, byteArray):
         if(len(byteArray) < 16):
             return -1
         else:
             return ((byteArray[15] >> 4) & 7)
+
+    def getPrintCount(self, byteArray):
+        if(len(byteArray) < 16):
+            return -1
+        else:
+            return ((byteArray[15] >> 0) & 15)
+
+    def encodeBatteryAndPrintCount(self, battery, printCount):
+        oneByteInt = bytearray()
+        oneByteInt.append((battery << 4) | printCount << 0)
+        return oneByteInt
 
     def printByteArray(self, byteArray):
         hexstr = ''.join('%02x' % i for i in byteArray)
