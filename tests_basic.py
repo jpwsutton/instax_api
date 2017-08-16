@@ -3,7 +3,8 @@ Instax SP2 Test File.
 
 @jpwsutton 2016/17
 """
-from instax import PacketFactory, Packet, SpecificationsCommand, VersionCommand
+from instax import PacketFactory, Packet, SpecificationsCommand,  \
+    VersionCommand, PrintCountCommand
 import time
 import unittest
 
@@ -174,6 +175,67 @@ class PacketTests(unittest.TestCase):
         self.assertEqual(decodedPacket.payload['unknown1'], 257)
         self.assertEqual(decodedPacket.payload['firmware'], '01.13')
         self.assertEqual(decodedPacket.payload['hardware'], '00.00')
+
+    def test_encode_cmd_printCount(self):
+        """Test the process of encoding a print count command."""
+        # Create Specifications Command Packet
+        sessionTime = int(round(time.time() * 1000))
+        pinCode = 1111
+        cmdPacket = PrintCountCommand(Packet.MESSAGE_MODE_COMMAND)
+        # Encode the command to raw byte array
+        encodedCommand = cmdPacket.encodeCommand(sessionTime, pinCode)
+        # Decode the command back into a packet object
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(encodedCommand)
+        # decodedPacket.printDebug()
+        postHeader = decodedPacket.header
+        self.helper_verify_header(postHeader,
+                                  Packet.MESSAGE_MODE_COMMAND,
+                                  Packet.MESSAGE_TYPE_PRINT_COUNT,
+                                  len(encodedCommand),
+                                  cmdPacket.encodedSessionTime,
+                                  pinCode)
+
+    def test_encode_resp_printCount(self):
+        """Test the process of encoding a print count response."""
+        sessionTime = int(round(time.time() * 1000))
+        returnCode = Packet.RTN_E_RCV_FRAME
+        ejecting = 0
+        battery = 2
+        printCount = 7
+        printHistory = 42
+        resPacket = PrintCountCommand(Packet.MESSAGE_MODE_RESPONSE,
+                                      printHistory=printHistory)
+        encodedResponse = resPacket.encodeResponse(sessionTime, returnCode,
+                                                   ejecting, battery,
+                                                   printCount)
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(encodedResponse)
+        # decodedPacket.printDebug()
+        postHeader = decodedPacket.header
+        self.helper_verify_header(postHeader,
+                                  Packet.MESSAGE_MODE_RESPONSE,
+                                  Packet.MESSAGE_TYPE_PRINT_COUNT,
+                                  len(encodedResponse),
+                                  resPacket.encodedSessionTime,
+                                  returnCode=returnCode,
+                                  ejecting=ejecting,
+                                  battery=battery,
+                                  printCount=printCount)
+
+        # Verify Payload
+        self.assertEqual(decodedPacket.payload['printHistory'], printHistory)
+
+    def test_premade_resp_printCount(self):
+        """Test Decoding a Print Count Response with an existing payload."""
+        msg = bytearray.fromhex('2ac1 0024 e759 eede 0000'
+                                ' 0000 0000 0027 0000 0003'
+                                ' 00f3 c048 0000 1645 001e'
+                                ' 0000 f946 0d0a')
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(msg)
+        # decodedPacket.printDebug()
+        self.assertEqual(decodedPacket.payload['printHistory'], 3)
 
 
 if __name__ == '__main__':

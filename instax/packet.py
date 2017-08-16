@@ -35,6 +35,8 @@ class PacketFactory(object):
             return(SpecificationsCommand(mode=self.mode, byteArray=byteArray))
         elif pType == self.MESSAGE_TYPE_PRINTER_VERSION:
             return(VersionCommand(mode=self.mode, byteArray=byteArray))
+        elif pType == self.MESSAGE_TYPE_PRINT_COUNT:
+            return(PrintCountCommand(mode=self.mode, byteArray=byteArray))
         elif pType == self.MESSAGE_TYPE_RESET:
             return(ResetCommand(mode=self.mode, byteArray=byteArray))
         elif pType == self.MESSAGE_TYPE_PREP_IMAGE:
@@ -443,8 +445,7 @@ class PrintCountCommand(Packet):
     NAME = "Print Count"
     TYPE = Packet.MESSAGE_TYPE_PRINT_COUNT
 
-    def __init__(self, mode, byteArray=None, battery=None,
-                 availablePrints=None, printHistory=None):
+    def __init__(self, mode, byteArray=None, printHistory=None):
         """Initialise the packet."""
         super(PrintCountCommand, self).__init__(mode)
         self.payload = {}
@@ -462,8 +463,6 @@ class PrintCountCommand(Packet):
                 self.payload = self.decodeRespPayload(byteArray)
         else:
             self.mode = mode
-            self.battery = battery
-            self.availablePrints = availablePrints
             self.printHistory = printHistory
 
     def encodeComPayload(self):
@@ -483,24 +482,15 @@ class PrintCountCommand(Packet):
     def encodeRespPayload(self):
         """Encode Response payload."""
         payload = bytearray()
-        payload = payload + self.utilities.encodeTwoByteInt(self.unknown1)
-        payload = payload + self.utilities.encodeTwoByteInt(self.firmware)
-        payload = payload + self.utilities.encodeTwoByteInt(self.hardware)
-        payload.append(0)  # Nothing
-        payload.append(0)  # Nothing
+        payload = payload + self.utilities.encodeFourByteInt(self.printHistory)
+        payload = payload + bytearray(12)
         return payload
 
     def decodeRespPayload(self, byteArray):
         """Decode Response payload."""
-        self.unknown1 = self.utilities.getTwoByteInt(16, byteArray)
-        self.firmware = self.utilities.formatVersionNumber(
-                            self.utilities.getTwoByteInt(18, byteArray))
-        self.hardware = self.utilities.formatVersionNumber(
-                            self.utilities.getTwoByteInt(20, byteArray))
+        self.printHistory = self.utilities.getFourByteInt(16, byteArray)
         self.payload = {
-            'unknown1': self.unknown1,
-            'firmware': self.firmware,
-            'hardware': self.hardware
+            'printHistory': self.printHistory
         }
         return self.payload
 
