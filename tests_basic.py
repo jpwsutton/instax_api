@@ -238,6 +238,17 @@ class PacketTests(unittest.TestCase):
         self.assertEqual(decodedPacket.payload['printHistory'], 3)
 
 
+
+    def test_premade_cmd_modelName(self):
+        """Test Decoding a Model Name Command"""
+        msg = bytearray.fromhex('24c2 0010 0b8d c2b4 0457 0000 fca0 0d0a')
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(msg)
+        decodedPacket.printDebug()
+
+
+
+
 if __name__ == '__main__':
 
     unittest.main()

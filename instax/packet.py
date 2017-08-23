@@ -43,6 +43,8 @@ class PacketFactory(object):
             return(PrepImageCommand(mode=self.mode, byteArray=byteArray))
         elif pType == self.MESSAGE_TYPE_SEND_IMAGE:
             return(SendImageCommand(mode=self.mode, byteArray=byteArray))
+        elif pType == self.MESSAGE_TYPE_MODEL_NAME:
+            return(ModelNameCommand(mode=self.mode, byteArray=byteArray))
         else:
             print("Unknown Packet Type: " + str(pType))
 
@@ -493,6 +495,62 @@ class PrintCountCommand(Packet):
             'printHistory': self.printHistory
         }
         return self.payload
+
+
+class ModelNameCommand(Packet):
+    """Model Name Command"""
+
+    NAME = "Model Name"
+    TYPE = Packet.MESSAGE_TYPE_MODEL_NAME
+
+    def __init__(self, mode, byteArray=None, modelName=None):
+        """Initialise the packet."""
+        super(ModelNameCommand, self).__init__(mode)
+        self.payload = {}
+        self.mode = mode
+
+        if (byteArray is not None):
+            self.byteArray = byteArray
+            self.header = super(ModelNameCommand,
+                                self).decodeHeader(mode, byteArray)
+            self.valid = self.validatePacket(byteArray,
+                                             self.header['packetLength'])
+            if(mode == self.MESSAGE_MODE_COMMAND):
+                self.decodedCommandPayload = self.decodeComPayload(byteArray)
+            elif(mode == self.MESSAGE_MODE_RESPONSE):
+                self.payload = self.decodeRespPayload(byteArray)
+        else:
+            self.mode = mode
+            self.modelName = modelName
+
+    def encodeComPayload(self):
+        """Encode Command payload.
+
+        This command does not have a payload, pass.
+        """
+        return {}
+
+    def decodeComPayload(self, byteArray):
+        """Decode Command payload.
+
+        This command does not have a payload, pass.
+        """
+        return {}
+
+    def encodeRespPayload(self):
+        """Encode Response payload."""
+        payload = bytearray()
+        payload = payload + self.utilities.encodeModelString(self.modelName)
+        return payload
+
+    def decodeRespPayload(self, byteArray):
+        """Decode Response payload."""
+        self.modelName = self.utilities.getPrinterModelString(16, byteArray)
+        self.payload = {
+            'modelName': self.modelName
+        }
+        return self.payload
+
 
 
 

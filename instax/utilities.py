@@ -93,6 +93,10 @@ class Utilities:
         part1 = ((65280 & version) >> 8)
         return('%s.%s' % ("%0.2X" % part1, "%0.2X" % part2))
 
+    def encodeModelString(self, model):
+        # TODO - Work out how to encode the Model String
+        return bytearray.fromhex('5350 2d32')
+
     def getPrinterModelString(self, byteArray):
         modelString = ''
         modelStringLength = len(byteArray) - 20
