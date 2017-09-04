@@ -244,6 +244,14 @@ class PacketTests(unittest.TestCase):
         msg = bytearray.fromhex('24c2 0010 0b8d c2b4 0457 0000 fca0 0d0a')
         packetFactory = PacketFactory()
         decodedPacket = packetFactory.decode(msg)
+        #decodedPacket.printDebug()
+
+    def test_premade_cmd_prePrint(self):
+        """Test Decoding a Pre Print Command"""
+        msg = bytearray.fromhex('24c4 0014 4e40 684c 0457'
+                                ' 0000 0000 0008 fd5e 0d0a')
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(msg)
         decodedPacket.printDebug()
 
 

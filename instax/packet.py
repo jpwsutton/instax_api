@@ -14,7 +14,7 @@ class PacketFactory(object):
     MESSAGE_TYPE_PRINT_COUNT = 193
     MESSAGE_TYPE_MODEL_NAME = 194
     MESSAGE_TYPE_UNKNOWN_2 = 195
-    MESSAGE_TYPE_UNKNOWN_3 = 196
+    MESSAGE_TYPE_PRE_PRINT = 196
 
     MESSAGE_MODE_COMMAND = 36  # Command from Client
     MESSAGE_MODE_RESPONSE = 42  # Response from Server
@@ -45,6 +45,8 @@ class PacketFactory(object):
             return(SendImageCommand(mode=self.mode, byteArray=byteArray))
         elif pType == self.MESSAGE_TYPE_MODEL_NAME:
             return(ModelNameCommand(mode=self.mode, byteArray=byteArray))
+        elif pType == self.MESSAGE_TYPE_PRE_PRINT:
+            return(PrePrintCommand(mode=self.mode, byteArray=byteArray))
         else:
             print("Unknown Packet Type: " + str(pType))
 
@@ -62,7 +64,7 @@ class Packet(object):
     MESSAGE_TYPE_PRINT_COUNT = 193
     MESSAGE_TYPE_MODEL_NAME = 194
     MESSAGE_TYPE_UNKNOWN_2 = 195
-    MESSAGE_TYPE_UNKNOWN_3 = 196
+    MESSAGE_TYPE_PRE_PRINT = 196
 
     MESSAGE_MODE_COMMAND = 36  # Command from Client
     MESSAGE_MODE_RESPONSE = 42  # Response from Server
@@ -551,6 +553,51 @@ class ModelNameCommand(Packet):
         }
         return self.payload
 
+class PrePrintCommand(Packet):
+    """Pre Print Command"""
+    NAME = "Pre Print"
+    TYPE = Packet.MESSAGE_TYPE_PRE_PRINT
+
+    def __init__(self, mode, byteArray=None, cmdNumber=None, respNumber=None):
+        """Initialise the packet."""
+        super(PrePrintCommand, self).__init__(mode)
+        self.payload = {}
+        self.mode = mode
+
+        if(byteArray is not None):
+            self.byteArray = byteArray
+            self.header = super(PrePrintCommand,
+                                self).decodeHeader(mode, byteArray)
+            self.valid = self.validatePacket(byteArray,
+                                             self.header['packetLength'])
+            if(mode == self.MESSAGE_MODE_COMMAND):
+                self.decodedCommandPayload = self.decodeComPayload(byteArray)
+            elif(mode == self.MESSAGE_MODE_RESPONSE):
+                self.payload = self.decodeRespPayload(byteArray)
+        else:
+            self.mode = mode
+            self.respNumber = respNumber
+
+    def encodeComPayload(self):
+        """Encode Command Payload."""
+        return {}
+
+    def decodeComPayload(self, byteArray):
+        """Decode the Command Payload."""
+        self.cmdNumber = self.utilities.getTwoByteInt(14, byteArray)
+        self.payload = {
+            'cmdNumber': self.cmdNumber
+        }
+        return self.payload
+
+    def encodeRespPayload(self):
+        """Encode Response Payload."""
+        payload = bytearray()
+        return payload
+
+    def decodeRespPayload(self, byteArray):
+        """Decode Response Payload."""
+        return {}
 
 
 
