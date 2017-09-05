@@ -553,6 +553,7 @@ class ModelNameCommand(Packet):
         }
         return self.payload
 
+
 class PrePrintCommand(Packet):
     """Pre Print Command"""
     NAME = "Pre Print"
@@ -580,7 +581,10 @@ class PrePrintCommand(Packet):
 
     def encodeComPayload(self):
         """Encode Command Payload."""
-        return {}
+        payload = bytearray()
+        payload = payload + bytearray(2)
+        payload = payload + self.utilities.encodeTwoByteInt(self.cmdNumber)
+        return payload
 
     def decodeComPayload(self, byteArray):
         """Decode the Command Payload."""
