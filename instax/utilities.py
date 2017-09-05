@@ -97,17 +97,11 @@ class Utilities:
         # TODO - Work out how to encode the Model String
         return bytearray.fromhex('5350 2d32')
 
-    def getPrinterModelString(self, byteArray):
-        modelString = ''
-        modelStringLength = len(byteArray) - 20
-        if(modelStringLength < 1):
+    def getPrinterModelString(self, offset, byteArray):
+        if(len(byteArray) < (offset + 4)):
             return ''
-        index = 0
-        while(index < modelStringLength):
-            modelString += chr(byteArray[index])
-            index += 1
-
-        return modelString
+        else:
+            return str(byteArray[offset: offset+4], 'ascii')
 
     def getPayloadBytes(self, offset, length, byteArray):
         return byteArray[offset:offset + length + 1]

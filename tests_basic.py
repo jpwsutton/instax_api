@@ -4,7 +4,7 @@ Instax SP2 Test File.
 @jpwsutton 2016/17
 """
 from instax import PacketFactory, Packet, SpecificationsCommand,  \
-    VersionCommand, PrintCountCommand
+    VersionCommand, PrintCountCommand, ModelNameCommand, PrePrintCommand
 import time
 import unittest
 
@@ -178,7 +178,7 @@ class PacketTests(unittest.TestCase):
 
     def test_encode_cmd_printCount(self):
         """Test the process of encoding a print count command."""
-        # Create Specifications Command Packet
+        # Create Print Count Command Packet
         sessionTime = int(round(time.time() * 1000))
         pinCode = 1111
         cmdPacket = PrintCountCommand(Packet.MESSAGE_MODE_COMMAND)
@@ -237,25 +237,123 @@ class PacketTests(unittest.TestCase):
         # decodedPacket.printDebug()
         self.assertEqual(decodedPacket.payload['printHistory'], 3)
 
+    def test_encode_cmd_modelName(self):
+        """Test the process of encoding a model name command."""
+        # Create Model Name Command Packet
+        sessionTime = int(round(time.time() * 1000))
+        pinCode = 1111
+        cmdPacket = ModelNameCommand(Packet.MESSAGE_MODE_COMMAND)
+        # Encodde the command to raw byte array
+        encodedCommand = cmdPacket.encodeCommand(sessionTime, pinCode)
+        # Decode the command back into a packet object
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(encodedCommand)
+        postHeader = decodedPacket.header
+        self.helper_verify_header(postHeader,
+                                  Packet.MESSAGE_MODE_COMMAND,
+                                  Packet.MESSAGE_TYPE_MODEL_NAME,
+                                  len(encodedCommand),
+                                  cmdPacket.encodedSessionTime,
+                                  pinCode)
 
+    def test_encode_resp_modelName(self):
+        """Test the process of encoding a model name response."""
+        sessionTime = int(round(time.time() * 1000))
+        returnCode = Packet.RTN_E_RCV_FRAME
+        ejecting = 0
+        battery = 2
+        printCount = 7
+        modelName = 'SP-2'
+        resPacket = ModelNameCommand(Packet.MESSAGE_MODE_RESPONSE,
+                                     modelName=modelName)
+        encodedResponse = resPacket.encodeResponse(sessionTime, returnCode,
+                                                   ejecting, battery,
+                                                   printCount)
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(encodedResponse)
+        # decodedPacket.printDebug()
+        postHeader = decodedPacket.header
+        self.helper_verify_header(postHeader,
+                                  Packet.MESSAGE_MODE_RESPONSE,
+                                  Packet.MESSAGE_TYPE_MODEL_NAME,
+                                  len(encodedResponse),
+                                  resPacket.encodedSessionTime,
+                                  returnCode=returnCode,
+                                  ejecting=ejecting,
+                                  battery=battery,
+                                  printCount=printCount)
+
+        # Verify Payload
+        self.assertEqual(decodedPacket.payload['modelName'], modelName)
 
     def test_premade_cmd_modelName(self):
-        """Test Decoding a Model Name Command"""
+        """Test Decoding a Model Name Command."""
         msg = bytearray.fromhex('24c2 0010 0b8d c2b4 0457 0000 fca0 0d0a')
         packetFactory = PacketFactory()
-        decodedPacket = packetFactory.decode(msg)
-        #decodedPacket.printDebug()
+        packetFactory.decode(msg)
+
+    def test_encode_cmd_prePrint(self):
+        """Test the process of encoding a prePrint command."""
+        # Create Model Name Command Packet
+        sessionTime = int(round(time.time() * 1000))
+        pinCode = 1111
+        cmdNumber = 8
+        cmdPacket = PrePrintCommand(Packet.MESSAGE_MODE_COMMAND,
+                                    cmdNumber=cmdNumber)
+        # Encodde the command to raw byte array
+        encodedCommand = cmdPacket.encodeCommand(sessionTime, pinCode)
+        # Decodee the command back into a packet object
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(encodedCommand)
+        postHeader = decodedPacket.header
+        self.helper_verify_header(postHeader,
+                                  Packet.MESSAGE_MODE_COMMAND,
+                                  Packet.MESSAGE_TYPE_PRE_PRINT,
+                                  len(encodedCommand),
+                                  cmdPacket.encodedSessionTime,
+                                  pinCode)
+        # Verify Payload
+        self.assertEqual(decodedPacket.payload['cmdNumber'], cmdNumber)
+
+    def test_encode_resp_prePrint(self):
+        """Test the process of encoding a pre print response."""
+        sessionTime = int(round(time.time() * 1000))
+        returnCode = Packet.RTN_E_RCV_FRAME
+        ejecting = 0
+        battery = 2
+        printCount = 7
+        cmdNumber = 8
+        respNumber = 1
+        resPacket = PrePrintCommand(Packet.MESSAGE_MODE_RESPONSE,
+                                    cmdNumber=cmdNumber,
+                                    respNumber=respNumber)
+        encodedResponse = resPacket.encodeResponse(sessionTime, returnCode,
+                                                   ejecting, battery,
+                                                   printCount)
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(encodedResponse)
+        # decodedPacket.printDebug()
+        postHeader = decodedPacket.header
+        self.helper_verify_header(postHeader,
+                                  Packet.MESSAGE_MODE_RESPONSE,
+                                  Packet.MESSAGE_TYPE_PRE_PRINT,
+                                  len(encodedResponse),
+                                  resPacket.encodedSessionTime,
+                                  returnCode=returnCode,
+                                  ejecting=ejecting,
+                                  battery=battery,
+                                  printCount=printCount)
+
+        # Verify Payload
+        self.assertEqual(decodedPacket.payload['cmdNumber'], cmdNumber)
+        self.assertEqual(decodedPacket.payload['respNumber'], respNumber)
 
     def test_premade_cmd_prePrint(self):
-        """Test Decoding a Pre Print Command"""
+        """Test Decoding a Pre Print Command."""
         msg = bytearray.fromhex('24c4 0014 4e40 684c 0457'
                                 ' 0000 0000 0008 fd5e 0d0a')
         packetFactory = PacketFactory()
-        decodedPacket = packetFactory.decode(msg)
-        decodedPacket.printDebug()
-
-
-
+        packetFactory.decode(msg)
 
 if __name__ == '__main__':
 

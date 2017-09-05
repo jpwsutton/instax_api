@@ -577,6 +577,7 @@ class PrePrintCommand(Packet):
                 self.payload = self.decodeRespPayload(byteArray)
         else:
             self.mode = mode
+            self.cmdNumber = cmdNumber
             self.respNumber = respNumber
 
     def encodeComPayload(self):
@@ -597,11 +598,19 @@ class PrePrintCommand(Packet):
     def encodeRespPayload(self):
         """Encode Response Payload."""
         payload = bytearray()
+        payload = payload + self.utilities.encodeTwoByteInt(self.cmdNumber)
+        payload = payload + self.utilities.encodeTwoByteInt(self.respNumber)
         return payload
 
     def decodeRespPayload(self, byteArray):
         """Decode Response Payload."""
-        return {}
+        self.cmdNumber = self.utilities.getTwoByteInt(16, byteArray)
+        self.respNumber = self.utilities.getTwoByteInt(18, byteArray)
+        self.payload = {
+            'cmdNumber': self.cmdNumber,
+            'respNumber': self.respNumber
+        }
+        return self.payload
 
 
 
