@@ -1,0 +1,294 @@
+Instax SP-2 Test Server
+Instax API EchoServer
+Listening on  port 8080
+--------------------------------------------------
+len: 4
+header: 24c0 0010
+('message length: ', 16)
+received: 24c0 0010 5899 2246 ffff 0000 fbb4 0d0a
+-------------------------------------------------------------
+Bytes: 24c0 0010 5899 2246 ffff 0000 fbb4 0d0a
+Mode:  Command
+Type:  Version
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 192
+    Packet Length: 16
+    Session Time: 1486430790
+    Password: 65535
+Payload: None
+-------------------------------------------------------------
+
+--------------------------------------------------
+--------------------------------------------------
+len: 4
+header: 24c2 0010
+('message length: ', 16)
+received: 24c2 0010 5899 2246 0457 0000 fd55 0d0a
+-------------------------------------------------------------
+Bytes: 24c2 0010 5899 2246 0457 0000 fd55 0d0a
+Mode:  Command
+Type:  Model Name
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 194
+    Packet Length: 16
+    Session Time: 1486430790
+    Password: 1111
+Payload: None
+-------------------------------------------------------------
+
+--------------------------------------------------
+No data, closing client
+--------------------------------------------------
+len: 4
+header: 24c4 0014
+('message length: ', 20)
+received: 24c4 0014 5899 2246 0457 0000 0000 0001 fd4e 0d0a
+-------------------------------------------------------------
+Bytes: 24c4 0014 5899 2246 0457 0000 0000 0001 fd4e 0d0a
+Mode:  Command
+Type:  Pre Print
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 196
+    Packet Length: 20
+    Session Time: 1486430790
+    Password: 1111
+Payload:
+     cmdNumber : 1
+-------------------------------------------------------------
+
+--------------------------------------------------
+--------------------------------------------------
+len: 4
+header: 24c4 0014
+('message length: ', 20)
+received: 24c4 0014 5899 2246 0457 0000 0000 0002 fd4d 0d0a
+-------------------------------------------------------------
+Bytes: 24c4 0014 5899 2246 0457 0000 0000 0002 fd4d 0d0a
+Mode:  Command
+Type:  Pre Print
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 196
+    Packet Length: 20
+    Session Time: 1486430790
+    Password: 1111
+Payload:
+     cmdNumber : 2
+-------------------------------------------------------------
+
+--------------------------------------------------
+--------------------------------------------------
+len: 4
+header: 24c4 0014
+('message length: ', 20)
+received: 24c4 0014 5899 2246 0457 0000 0000 0003 fd4c 0d0a
+-------------------------------------------------------------
+Bytes: 24c4 0014 5899 2246 0457 0000 0000 0003 fd4c 0d0a
+Mode:  Command
+Type:  Pre Print
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 196
+    Packet Length: 20
+    Session Time: 1486430790
+    Password: 1111
+Payload:
+     cmdNumber : 3
+-------------------------------------------------------------
+
+--------------------------------------------------
+--------------------------------------------------
+len: 4
+header: 24c4 0014
+('message length: ', 20)
+received: 24c4 0014 5899 2246 0457 0000 0000 0004 fd4b 0d0a
+-------------------------------------------------------------
+Bytes: 24c4 0014 5899 2246 0457 0000 0000 0004 fd4b 0d0a
+Mode:  Command
+Type:  Pre Print
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 196
+    Packet Length: 20
+    Session Time: 1486430790
+    Password: 1111
+Payload:
+     cmdNumber : 4
+-------------------------------------------------------------
+
+--------------------------------------------------
+--------------------------------------------------
+len: 4
+header: 24c4 0014
+('message length: ', 20)
+received: 24c4 0014 5899 2246 0457 0000 0000 0005 fd4a 0d0a
+-------------------------------------------------------------
+Bytes: 24c4 0014 5899 2246 0457 0000 0000 0005 fd4a 0d0a
+Mode:  Command
+Type:  Pre Print
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 196
+    Packet Length: 20
+    Session Time: 1486430790
+    Password: 1111
+Payload:
+     cmdNumber : 5
+-------------------------------------------------------------
+
+--------------------------------------------------
+--------------------------------------------------
+len: 4
+header: 24c4 0014
+('message length: ', 20)
+received: 24c4 0014 5899 2246 0457 0000 0000 0006 fd49 0d0a
+-------------------------------------------------------------
+Bytes: 24c4 0014 5899 2246 0457 0000 0000 0006 fd49 0d0a
+Mode:  Command
+Type:  Pre Print
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 196
+    Packet Length: 20
+    Session Time: 1486430790
+    Password: 1111
+Payload:
+     cmdNumber : 6
+-------------------------------------------------------------
+
+--------------------------------------------------
+--------------------------------------------------
+len: 4
+header: 24c4 0014
+('message length: ', 20)
+received: 24c4 0014 5899 2246 0457 0000 0000 0007 fd48 0d0a
+-------------------------------------------------------------
+Bytes: 24c4 0014 5899 2246 0457 0000 0000 0007 fd48 0d0a
+Mode:  Command
+Type:  Pre Print
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 196
+    Packet Length: 20
+    Session Time: 1486430790
+    Password: 1111
+Payload:
+     cmdNumber : 7
+-------------------------------------------------------------
+
+--------------------------------------------------
+--------------------------------------------------
+len: 4
+header: 24c4 0014
+('message length: ', 20)
+received: 24c4 0014 5899 2246 0457 0000 0000 0008 fd47 0d0a
+-------------------------------------------------------------
+Bytes: 24c4 0014 5899 2246 0457 0000 0000 0008 fd47 0d0a
+Mode:  Command
+Type:  Pre Print
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 196
+    Packet Length: 20
+    Session Time: 1486430790
+    Password: 1111
+Payload:
+     cmdNumber : 8
+-------------------------------------------------------------
+
+--------------------------------------------------
+No data, closing client
+--------------------------------------------------
+len: 4
+header: 24c2 0010
+('message length: ', 16)
+received: 24c2 0010 5899 2246 0457 0000 fd55 0d0a
+-------------------------------------------------------------
+Bytes: 24c2 0010 5899 2246 0457 0000 fd55 0d0a
+Mode:  Command
+Type:  Model Name
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 194
+    Packet Length: 16
+    Session Time: 1486430790
+    Password: 1111
+Payload: None
+-------------------------------------------------------------
+
+--------------------------------------------------
+--------------------------------------------------
+len: 4
+header: 24c0 0010
+('message length: ', 16)
+received: 24c0 0010 5899 2246 0457 0000 fd57 0d0a
+-------------------------------------------------------------
+Bytes: 24c0 0010 5899 2246 0457 0000 fd57 0d0a
+Mode:  Command
+Type:  Version
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 192
+    Packet Length: 16
+    Session Time: 1486430790
+    Password: 1111
+Payload: None
+-------------------------------------------------------------
+
+--------------------------------------------------
+--------------------------------------------------
+len: 4
+header: 24c1 0010
+('message length: ', 16)
+received: 24c1 0010 5899 2246 0457 0000 fd56 0d0a
+-------------------------------------------------------------
+Bytes: 24c1 0010 5899 2246 0457 0000 fd56 0d0a
+Mode:  Command
+Type:  Print Count
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 193
+    Packet Length: 16
+    Session Time: 1486430790
+    Password: 1111
+Payload: None
+-------------------------------------------------------------
+
+--------------------------------------------------
+--------------------------------------------------
+len: 4
+header: 244f 0010
+('message length: ', 16)
+received: 244f 0010 5899 2246 0457 0000 fdc8 0d0a
+-------------------------------------------------------------
+Bytes: 244f 0010 5899 2246 0457 0000 fdc8 0d0a
+Mode:  Command
+Type:  Specifications
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 79
+    Packet Length: 16
+    Session Time: 1486430790
+    Password: 1111
+Payload: None
+-------------------------------------------------------------
+
+--------------------------------------------------
+No data, closing client
