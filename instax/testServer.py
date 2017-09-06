@@ -121,10 +121,19 @@ class TestServer:
 
     def processPrePrintCommand(self, decodedPacket):
         cmdNumber = decodedPacket.payload['cmdNumber']
+        if(cmdNumber in [6, 7, 8]):
+            respNumber = 0
+        elif(cmdNumber in [4, 5]):
+            respNumber = 1
+        elif(cmdNumber in [1, 2, 3]):
+            respNumber = 2
+        else:
+            print("Unknown cmdNumber")
+            respNumber = 0
         sessionTime = decodedPacket.header['sessionTime']
         resPacket = PrePrintCommand(Packet.MESSAGE_MODE_RESPONSE,
                                     cmdNumber=cmdNumber,
-                                    respNumber=1)
+                                    respNumber=respNumber)
         encodedResponse = resPacket.encodeResponse(sessionTime,
                                                    self.returnCode,
                                                    self.ejecting,
