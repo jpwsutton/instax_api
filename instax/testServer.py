@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import socket
 from .packet import Packet, PacketFactory, SpecificationsCommand, \
-    VersionCommand, PrintCountCommand, ModelNameCommand
+    VersionCommand, PrintCountCommand, ModelNameCommand, PrePrintCommand
 
 
 class TestServer:
@@ -69,6 +69,8 @@ class TestServer:
             return self.processModelNameCommand(decodedPacket)
         elif(decodedPacket.TYPE == Packet.MESSAGE_TYPE_PRINT_COUNT):
             return self.processPrintCountCommand(decodedPacket)
+        elif(decodedPacket.TYPE == Packet.MESSAGE_TYPE_PRE_PRINT):
+            return self.processPrePrintCommand(decodedPacket)
         else:
             print('Unknown Command. Failing!')
 
@@ -101,7 +103,7 @@ class TestServer:
     def processModelNameCommand(self, decodedPacket):
         sessionTime = decodedPacket.header['sessionTime']
         resPacket = ModelNameCommand(Packet.MESSAGE_MODE_RESPONSE,
-                                   modelName='SP-2')
+                                     modelName='SP-2')
         encodedResponse = resPacket.encodeResponse(sessionTime, self.returnCode,
                                                    self.ejecting, self.battery,
                                                    self.printCount)
@@ -110,9 +112,22 @@ class TestServer:
     def processPrintCountCommand(self, decodedPacket):
         sessionTime = decodedPacket.header['sessionTime']
         resPacket = PrintCountCommand(Packet.MESSAGE_MODE_RESPONSE,
-                                   printHistory=20)
-        encodedResponse = resPacket.encodeResponse(sessionTime, self.returnCode,
+                                      printHistory=20)
+        encodedResponse = resPacket.encodeResponse(sessionTime,
+                                                   self.returnCode,
                                                    self.ejecting, self.battery,
                                                    self.printCount)
         return encodedResponse
 
+    def processPrePrintCommand(self, decodedPacket):
+        cmdNumber = decodedPacket.payload['cmdNumber']
+        sessionTime = decodedPacket.header['sessionTime']
+        resPacket = PrePrintCommand(Packet.MESSAGE_MODE_RESPONSE,
+                                    cmdNumber=cmdNumber,
+                                    respNumber=1)
+        encodedResponse = resPacket.encodeResponse(sessionTime,
+                                                   self.returnCode,
+                                                   self.ejecting,
+                                                   self.battery,
+                                                   self.printCount)
+        return encodedResponse
