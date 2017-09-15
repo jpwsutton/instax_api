@@ -1,9 +1,7 @@
-from .commands import Commands
 from .comms import SocketClientThread, ClientCommand, ClientReply
 import time
 import queue
 from .exceptions import CommandTimedOutException, ConnectError, CommandError
-from .utilities import Utilities
 from .response import Response, ResponseCode, PrinterStatus
 from .packet import Packet, SpecificationsCommand
 
