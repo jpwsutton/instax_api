@@ -1,32 +1,38 @@
-#!/usr/bin/env python
+"""
+Fujifilm Instax-SP2 Server for testing.
+
+James Sutton - 2017 - jsutton.co.uk
+"""
 import socket
 from .packet import Packet, PacketFactory, SpecificationsCommand, \
     VersionCommand, PrintCountCommand, ModelNameCommand, PrePrintCommand
 
 
 class TestServer:
-    """ A Test Server for the Instax Library,
-        Simply returns dummy responses of the
-        correct type.
-    #"""
+    """A Test Server for the Instax Library."""
 
-    def __init__(self):
-        print("Instax API EchoServer")
-        self.host = ''
-        self.port = 8080
-        self.backlog = 5
+    def __init__(self, verbose=False, log=None, host='0.0.0.0', port=8080,
+                 dest="images", battery=2, remaining=10, total=20):
+        """Initialise Server."""
         self.packetFactory = PacketFactory()
-
+        self.host = host
+        self.verbose = verbose
+        self.log = log
+        self.dest = dest
+        self.port = port
+        self.backlog = 5
         self.returnCode = Packet.RTN_E_RCV_FRAME
         self.ejecting = 0
-        self.battery = 2
-        self.printCount = 7
+        self.battery = battery
+        self.printCount = total
+        self.remaining = remaining
 
     def start(self):
+        """Start the Server."""
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.bind((self.host, self.port))
         self.socket.listen(self.backlog)
-        print(('Listening on %s port %s' % (self.host, self.port)))
+        print(('Server Listening on %s port %s' % (self.host, self.port)))
         while True:
             client, address = self.socket.accept()
             while True:

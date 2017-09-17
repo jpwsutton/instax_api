@@ -1,3 +1,11 @@
+"""Fujifilm Instax SP-2 Packet Library.
+
+This packet library can be used to encode and decode packets to be sent to
+or recieved from a Fujifilm Instax SP-2. It is designed to be used with the
+instax_api Python Library.
+"""
+
+
 class PacketFactory(object):
     """Packet Factory.
 
@@ -144,6 +152,21 @@ class Packet(object):
                     print("    %s : %s" % (key, self.payload[key]))
         print("-------------------------------------------------------------")
         print()
+
+    def getPacketObject(self):
+        """Return a simple object containing all packet details."""
+        packetObj = {}
+        packetObj['bytes'] = self.printByteArray(self.byteArray)
+        packetObj['header'] = self.header
+        packetPayload = {}
+        for key in self.payload:
+            if(key == 'payloadBytes'):
+                packetPayload['payloadBytes'] = self.printByteArray(
+                                                    self.payload[key])
+            else:
+                packetPayload[key] = self.payload[key]
+        packetObj['payload'] = packetPayload
+        return packetObj
 
     def decodeHeader(self, mode, byteArray):
         """Decode packet header."""
@@ -544,7 +567,7 @@ class VersionCommand(Packet):
 
 
 class PrintCountCommand(Packet):
-    """Print Count Command"""
+    """Print Count Command."""
 
     NAME = "Print Count"
     TYPE = Packet.MESSAGE_TYPE_PRINT_COUNT
