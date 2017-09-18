@@ -6,6 +6,7 @@ James Sutton - 2017 - jsutton.co.uk
 import socket
 from .packet import Packet, PacketFactory, SpecificationsCommand, \
     VersionCommand, PrintCountCommand, ModelNameCommand, PrePrintCommand
+from pprint import pprint
 
 
 class TestServer:
@@ -66,6 +67,11 @@ class TestServer:
         packetFactory = PacketFactory()
         decodedPacket = packetFactory.decode(payload)
         decodedPacket.printDebug()
+        decodedPacketObj = decodedPacket.getPacketObject()
+        print("****************************************")
+        pprint(decodedPacketObj)
+        print("****************************************")
+	
 
         if(decodedPacket.TYPE == Packet.MESSAGE_TYPE_PRINTER_VERSION):
             return self.processVersionCommand(decodedPacket)

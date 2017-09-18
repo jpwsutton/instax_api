@@ -1,0 +1,433 @@
+---------- Instax SP-2 Test Server ---------- 
+Server Listening on 0.0.0.0 port 8080
+--------------------------------------------------
+len: 4
+header: 24c0 0010
+('message length: ', 16)
+received: 24c0 0010 9619 02df ffff 0000 fb7d 0d0a
+-------------------------------------------------------------
+Bytes: 24c0 0010 9619 02df ffff 0000 fb7d 0d0a
+Mode:  Command
+Type:  Version
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 192
+    Packet Length: 16
+    Session Time: 2518221535
+    Password: 65535
+Payload: None
+-------------------------------------------------------------
+
+****************************************
+{'bytes': '24c0 0010 9619 02df ffff 0000 fb7d 0d0a',
+ 'header': {'cmdByte': 192,
+            'packetLength': 16,
+            'password': 65535,
+            'sessionTime': 2518221535,
+            'startByte': 36},
+ 'payload': {}}
+****************************************
+--------------------------------------------------
+--------------------------------------------------
+len: 4
+header: 24c2 0010
+('message length: ', 16)
+received: 24c2 0010 9619 02df 0457 0000 fd1e 0d0a
+-------------------------------------------------------------
+Bytes: 24c2 0010 9619 02df 0457 0000 fd1e 0d0a
+Mode:  Command
+Type:  Model Name
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 194
+    Packet Length: 16
+    Session Time: 2518221535
+    Password: 1111
+Payload: None
+-------------------------------------------------------------
+
+****************************************
+{'bytes': '24c2 0010 9619 02df 0457 0000 fd1e 0d0a',
+ 'header': {'cmdByte': 194,
+            'packetLength': 16,
+            'password': 1111,
+            'sessionTime': 2518221535,
+            'startByte': 36},
+ 'payload': {}}
+****************************************
+--------------------------------------------------
+No data, closing client
+--------------------------------------------------
+len: 4
+header: 24c4 0014
+('message length: ', 20)
+received: 24c4 0014 9619 02df 0457 0000 0000 0001 fd17 0d0a
+-------------------------------------------------------------
+Bytes: 24c4 0014 9619 02df 0457 0000 0000 0001 fd17 0d0a
+Mode:  Command
+Type:  Pre Print
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 196
+    Packet Length: 20
+    Session Time: 2518221535
+    Password: 1111
+Payload:
+    cmdNumber : 1
+-------------------------------------------------------------
+
+****************************************
+{'bytes': '24c4 0014 9619 02df 0457 0000 0000 0001 fd17 0d0a',
+ 'header': {'cmdByte': 196,
+            'packetLength': 20,
+            'password': 1111,
+            'sessionTime': 2518221535,
+            'startByte': 36},
+ 'payload': {'cmdNumber': 1}}
+****************************************
+--------------------------------------------------
+--------------------------------------------------
+len: 4
+header: 24c4 0014
+('message length: ', 20)
+received: 24c4 0014 9619 02df 0457 0000 0000 0002 fd16 0d0a
+-------------------------------------------------------------
+Bytes: 24c4 0014 9619 02df 0457 0000 0000 0002 fd16 0d0a
+Mode:  Command
+Type:  Pre Print
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 196
+    Packet Length: 20
+    Session Time: 2518221535
+    Password: 1111
+Payload:
+    cmdNumber : 2
+-------------------------------------------------------------
+
+****************************************
+{'bytes': '24c4 0014 9619 02df 0457 0000 0000 0002 fd16 0d0a',
+ 'header': {'cmdByte': 196,
+            'packetLength': 20,
+            'password': 1111,
+            'sessionTime': 2518221535,
+            'startByte': 36},
+ 'payload': {'cmdNumber': 2}}
+****************************************
+--------------------------------------------------
+--------------------------------------------------
+len: 4
+header: 24c4 0014
+('message length: ', 20)
+received: 24c4 0014 9619 02df 0457 0000 0000 0003 fd15 0d0a
+-------------------------------------------------------------
+Bytes: 24c4 0014 9619 02df 0457 0000 0000 0003 fd15 0d0a
+Mode:  Command
+Type:  Pre Print
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 196
+    Packet Length: 20
+    Session Time: 2518221535
+    Password: 1111
+Payload:
+    cmdNumber : 3
+-------------------------------------------------------------
+
+****************************************
+{'bytes': '24c4 0014 9619 02df 0457 0000 0000 0003 fd15 0d0a',
+ 'header': {'cmdByte': 196,
+            'packetLength': 20,
+            'password': 1111,
+            'sessionTime': 2518221535,
+            'startByte': 36},
+ 'payload': {'cmdNumber': 3}}
+****************************************
+--------------------------------------------------
+--------------------------------------------------
+len: 4
+header: 24c4 0014
+('message length: ', 20)
+received: 24c4 0014 9619 02df 0457 0000 0000 0004 fd14 0d0a
+-------------------------------------------------------------
+Bytes: 24c4 0014 9619 02df 0457 0000 0000 0004 fd14 0d0a
+Mode:  Command
+Type:  Pre Print
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 196
+    Packet Length: 20
+    Session Time: 2518221535
+    Password: 1111
+Payload:
+    cmdNumber : 4
+-------------------------------------------------------------
+
+****************************************
+{'bytes': '24c4 0014 9619 02df 0457 0000 0000 0004 fd14 0d0a',
+ 'header': {'cmdByte': 196,
+            'packetLength': 20,
+            'password': 1111,
+            'sessionTime': 2518221535,
+            'startByte': 36},
+ 'payload': {'cmdNumber': 4}}
+****************************************
+--------------------------------------------------
+--------------------------------------------------
+len: 4
+header: 24c4 0014
+('message length: ', 20)
+received: 24c4 0014 9619 02df 0457 0000 0000 0005 fd13 0d0a
+-------------------------------------------------------------
+Bytes: 24c4 0014 9619 02df 0457 0000 0000 0005 fd13 0d0a
+Mode:  Command
+Type:  Pre Print
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 196
+    Packet Length: 20
+    Session Time: 2518221535
+    Password: 1111
+Payload:
+    cmdNumber : 5
+-------------------------------------------------------------
+
+****************************************
+{'bytes': '24c4 0014 9619 02df 0457 0000 0000 0005 fd13 0d0a',
+ 'header': {'cmdByte': 196,
+            'packetLength': 20,
+            'password': 1111,
+            'sessionTime': 2518221535,
+            'startByte': 36},
+ 'payload': {'cmdNumber': 5}}
+****************************************
+--------------------------------------------------
+--------------------------------------------------
+len: 4
+header: 24c4 0014
+('message length: ', 20)
+received: 24c4 0014 9619 02df 0457 0000 0000 0006 fd12 0d0a
+-------------------------------------------------------------
+Bytes: 24c4 0014 9619 02df 0457 0000 0000 0006 fd12 0d0a
+Mode:  Command
+Type:  Pre Print
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 196
+    Packet Length: 20
+    Session Time: 2518221535
+    Password: 1111
+Payload:
+    cmdNumber : 6
+-------------------------------------------------------------
+
+****************************************
+{'bytes': '24c4 0014 9619 02df 0457 0000 0000 0006 fd12 0d0a',
+ 'header': {'cmdByte': 196,
+            'packetLength': 20,
+            'password': 1111,
+            'sessionTime': 2518221535,
+            'startByte': 36},
+ 'payload': {'cmdNumber': 6}}
+****************************************
+--------------------------------------------------
+--------------------------------------------------
+len: 4
+header: 24c4 0014
+('message length: ', 20)
+received: 24c4 0014 9619 02df 0457 0000 0000 0007 fd11 0d0a
+-------------------------------------------------------------
+Bytes: 24c4 0014 9619 02df 0457 0000 0000 0007 fd11 0d0a
+Mode:  Command
+Type:  Pre Print
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 196
+    Packet Length: 20
+    Session Time: 2518221535
+    Password: 1111
+Payload:
+    cmdNumber : 7
+-------------------------------------------------------------
+
+****************************************
+{'bytes': '24c4 0014 9619 02df 0457 0000 0000 0007 fd11 0d0a',
+ 'header': {'cmdByte': 196,
+            'packetLength': 20,
+            'password': 1111,
+            'sessionTime': 2518221535,
+            'startByte': 36},
+ 'payload': {'cmdNumber': 7}}
+****************************************
+--------------------------------------------------
+--------------------------------------------------
+len: 4
+header: 24c4 0014
+('message length: ', 20)
+received: 24c4 0014 9619 02df 0457 0000 0000 0008 fd10 0d0a
+-------------------------------------------------------------
+Bytes: 24c4 0014 9619 02df 0457 0000 0000 0008 fd10 0d0a
+Mode:  Command
+Type:  Pre Print
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 196
+    Packet Length: 20
+    Session Time: 2518221535
+    Password: 1111
+Payload:
+    cmdNumber : 8
+-------------------------------------------------------------
+
+****************************************
+{'bytes': '24c4 0014 9619 02df 0457 0000 0000 0008 fd10 0d0a',
+ 'header': {'cmdByte': 196,
+            'packetLength': 20,
+            'password': 1111,
+            'sessionTime': 2518221535,
+            'startByte': 36},
+ 'payload': {'cmdNumber': 8}}
+****************************************
+--------------------------------------------------
+No data, closing client
+--------------------------------------------------
+len: 4
+header: 24c2 0010
+('message length: ', 16)
+received: 24c2 0010 9619 02df 0457 0000 fd1e 0d0a
+-------------------------------------------------------------
+Bytes: 24c2 0010 9619 02df 0457 0000 fd1e 0d0a
+Mode:  Command
+Type:  Model Name
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 194
+    Packet Length: 16
+    Session Time: 2518221535
+    Password: 1111
+Payload: None
+-------------------------------------------------------------
+
+****************************************
+{'bytes': '24c2 0010 9619 02df 0457 0000 fd1e 0d0a',
+ 'header': {'cmdByte': 194,
+            'packetLength': 16,
+            'password': 1111,
+            'sessionTime': 2518221535,
+            'startByte': 36},
+ 'payload': {}}
+****************************************
+--------------------------------------------------
+--------------------------------------------------
+len: 4
+header: 24c0 0010
+('message length: ', 16)
+received: 24c0 0010 9619 02df 0457 0000 fd20 0d0a
+-------------------------------------------------------------
+Bytes: 24c0 0010 9619 02df 0457 0000 fd20 0d0a
+Mode:  Command
+Type:  Version
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 192
+    Packet Length: 16
+    Session Time: 2518221535
+    Password: 1111
+Payload: None
+-------------------------------------------------------------
+
+****************************************
+{'bytes': '24c0 0010 9619 02df 0457 0000 fd20 0d0a',
+ 'header': {'cmdByte': 192,
+            'packetLength': 16,
+            'password': 1111,
+            'sessionTime': 2518221535,
+            'startByte': 36},
+ 'payload': {}}
+****************************************
+--------------------------------------------------
+--------------------------------------------------
+len: 4
+header: 24c1 0010
+('message length: ', 16)
+received: 24c1 0010 9619 02df 0457 0000 fd1f 0d0a
+-------------------------------------------------------------
+Bytes: 24c1 0010 9619 02df 0457 0000 fd1f 0d0a
+Mode:  Command
+Type:  Print Count
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 193
+    Packet Length: 16
+    Session Time: 2518221535
+    Password: 1111
+Payload: None
+-------------------------------------------------------------
+
+****************************************
+{'bytes': '24c1 0010 9619 02df 0457 0000 fd1f 0d0a',
+ 'header': {'cmdByte': 193,
+            'packetLength': 16,
+            'password': 1111,
+            'sessionTime': 2518221535,
+            'startByte': 36},
+ 'payload': {}}
+****************************************
+--------------------------------------------------
+--------------------------------------------------
+len: 4
+header: 244f 0010
+('message length: ', 16)
+received: 244f 0010 9619 02df 0457 0000 fd91 0d0a
+-------------------------------------------------------------
+Bytes: 244f 0010 9619 02df 0457 0000 fd91 0d0a
+Mode:  Command
+Type:  Specifications
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 79
+    Packet Length: 16
+    Session Time: 2518221535
+    Password: 1111
+Payload: None
+-------------------------------------------------------------
+
+****************************************
+{'bytes': '244f 0010 9619 02df 0457 0000 fd91 0d0a',
+ 'header': {'cmdByte': 79,
+            'packetLength': 16,
+            'password': 1111,
+            'sessionTime': 2518221535,
+            'startByte': 36},
+ 'payload': {}}
+****************************************
+--------------------------------------------------
+No data, closing client
+--------------------------------------------------
+len: 4
+header: 24b3 0014
+('message length: ', 20)
+received: 24b3 0014 9619 02df 0457 0000 0100 0000 fd28 0d0a
+Unknown Packet Type: 179
+Traceback (most recent call last):
+  File "testServer.py", line 65, in <module>
+    testServer.start()
+  File "/home/pi/instax_api/instax/testServer.py", line 52, in start
+    response = self.processIncomingMessage(payload)
+  File "/home/pi/instax_api/instax/testServer.py", line 69, in processIncomingMessage
+    decodedPacket.printDebug()
+AttributeError: 'NoneType' object has no attribute 'printDebug'
