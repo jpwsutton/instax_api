@@ -794,6 +794,8 @@ class ResetCommand(Packet):
                  ejecting=None, unknown2=None):
         """Initialise Reset Command Packet."""
         super(ResetCommand, self).__init__(mode)
+        self.payload = {}
+        self.mode = mode
         if (byteArray is not None):
             self.byteArray = byteArray
             self.header = super(ResetCommand,
@@ -807,16 +809,22 @@ class ResetCommand(Packet):
         else:
             self.mode = mode
 
+    def encodeComPayload(self):
+        """Encode Command Payload."""
+        return {}
+
     def decodeComPayload(self, byteArray):
-        """Decode Command payload.
-
-        This command does not have a payload, pass.
-        """
+        """Decode the Command Payload."""
         return {}
 
-    def decodeResponse(self, byteArray):
-        # This response does not have a payload
+    def encodeRespPayload(self):
+        """Encode Response Payload."""
         return {}
+
+    def decodeRespPayload(self, byteArray):
+        """Decode Response Payload."""
+        return {}
+
 
 class PrepImageCommand(Packet):
     NAME = "Image Prepare"
