@@ -355,6 +355,23 @@ class PacketTests(unittest.TestCase):
         packetFactory = PacketFactory()
         packetFactory.decode(msg)
 
+    def test_premade_cmd_lock(self):
+        """Test Decoding a Lock Command."""
+        msg = bytearray.fromhex('24b3 0014 9619 02df 0457'
+                                ' 0000 0100 0000 fd28 0d0a')
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(msg)
+        decodedPacket.printDebug()
+
+    def test_premade_resp_lock(self):
+        """Test Decoding a Lock Command."""
+        msg = bytearray.fromhex('2ab3 0014 75b8 bd8e 0000'
+                                ' 0000 0000 003a fc5c 0d0a')
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(msg)
+        decodedPacket.printDebug()
+
+
 if __name__ == '__main__':
 
     unittest.main()

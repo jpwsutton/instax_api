@@ -17,7 +17,7 @@ class PacketFactory(object):
     MESSAGE_TYPE_PREP_IMAGE = 81
     MESSAGE_TYPE_SEND_IMAGE = 82
     MESSAGE_TYPE_SET_LOCK_STATE = 176
-    MESSAGE_TYPE_UNKNOWN_1 = 179
+    MESSAGE_TYPE_LOCK_DEVICE = 179
     MESSAGE_TYPE_CHANGE_PASSWORD = 182
     MESSAGE_TYPE_PRINTER_VERSION = 192
     MESSAGE_TYPE_PRINT_COUNT = 193
@@ -56,6 +56,8 @@ class PacketFactory(object):
             return(ModelNameCommand(mode=self.mode, byteArray=byteArray))
         elif pType == self.MESSAGE_TYPE_PRE_PRINT:
             return(PrePrintCommand(mode=self.mode, byteArray=byteArray))
+        elif pType == self.MESSAGE_TYPE_LOCK_DEVICE:
+            return(PrinterLockCommand(mode=self.mode, byteArray=byteArray))
         else:
             print("Unknown Packet Type: " + str(pType))
 
@@ -68,7 +70,7 @@ class Packet(object):
     MESSAGE_TYPE_PREP_IMAGE = 81
     MESSAGE_TYPE_SEND_IMAGE = 82
     MESSAGE_TYPE_SET_LOCK_STATE = 176
-    MESSAGE_TYPE_UNKNOWN_1 = 179
+    MESSAGE_TYPE_LOCK_DEVICE = 179
     MESSAGE_TYPE_CHANGE_PASSWORD = 182
     MESSAGE_TYPE_PRINTER_VERSION = 192
     MESSAGE_TYPE_PRINT_COUNT = 193
@@ -735,6 +737,51 @@ class PrePrintCommand(Packet):
             'respNumber': self.respNumber
         }
         return self.payload
+
+
+class PrinterLockCommand(Packet):
+    """Printer Lock Command."""
+
+    NAME = "LockPrinter"
+    TYPE = Packet.MESSAGE_TYPE_LOCK_DEVICE
+
+    def __init__(self, mode, byteArray=None):
+        """Initialise Lock Printer Packet."""
+        super(PrinterLockCommand, self).__init__(mode)
+        self.payload = {}
+        self.mode = mode
+        if (byteArray is not None):
+            self.byteArray = byteArray
+            self.header = super(PrinterLockCommand,
+                                self).decodeHeader(mode, byteArray)
+            self.valid = self.validatePacket(byteArray,
+                                             self.header['packetLength'])
+            if(mode == self.MESSAGE_MODE_COMMAND):
+                self.decodedCommandPayload = self.decodeComPayload(byteArray)
+            elif(mode == self.MESSAGE_MODE_RESPONSE):
+                self.decodedCommandPayload = self.decodeRespPayload(byteArray)
+        else:
+            self.mode = mode
+
+    def encodeComPayload(self):
+        """Encode Command Payload."""
+        return {}
+
+    def decodeComPayload(self, byteArray):
+        """Decode the Command Payload."""
+        self.lockState = self.getOneByteInt(12, byteArray)
+        self.payload = {
+            'lockState': self.lockState
+        }
+        return self.payload
+
+    def encodeRespPayload(self):
+        """Encode Response Payload."""
+        return {}
+
+    def decodeRespPayload(self, byteArray):
+        """Decode Response Payload."""
+        return {}
 
 
 class ResetCommand(Packet):

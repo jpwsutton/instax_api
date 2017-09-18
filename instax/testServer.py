@@ -5,7 +5,8 @@ James Sutton - 2017 - jsutton.co.uk
 """
 import socket
 from .packet import Packet, PacketFactory, SpecificationsCommand, \
-    VersionCommand, PrintCountCommand, ModelNameCommand, PrePrintCommand
+    VersionCommand, PrintCountCommand, ModelNameCommand, PrePrintCommand, \
+    PrinterLockCommand
 from pprint import pprint
 
 
@@ -71,7 +72,6 @@ class TestServer:
         print("****************************************")
         pprint(decodedPacketObj)
         print("****************************************")
-	
 
         if(decodedPacket.TYPE == Packet.MESSAGE_TYPE_PRINTER_VERSION):
             return self.processVersionCommand(decodedPacket)
@@ -83,6 +83,8 @@ class TestServer:
             return self.processPrintCountCommand(decodedPacket)
         elif(decodedPacket.TYPE == Packet.MESSAGE_TYPE_PRE_PRINT):
             return self.processPrePrintCommand(decodedPacket)
+        elif(decodedPacket.TYPE == Packet.MESSAGE_TYPE_LOCK_DEVICE):
+            return self.processLockPrinterCommand(decodedPacket)
         else:
             print('Unknown Command. Failing!')
 
@@ -150,5 +152,14 @@ class TestServer:
                                                    self.returnCode,
                                                    self.ejecting,
                                                    self.battery,
+                                                   self.printCount)
+        return encodedResponse
+
+    def processLockPrinterCommand(self, decodedPacket):
+        sessionTime = decodedPacket.header['sessionTime']
+        resPacket = PrinterLockCommand(Packet.MESSAGE_MODE_RESPONSE)
+        encodedResponse = resPacket.encodeResponse(sessionTime,
+                                                   self.returnCode,
+                                                   self.ejecting, self.battery,
                                                    self.printCount)
         return encodedResponse
