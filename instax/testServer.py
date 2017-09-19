@@ -6,7 +6,7 @@ James Sutton - 2017 - jsutton.co.uk
 import socket
 from .packet import Packet, PacketFactory, SpecificationsCommand, \
     VersionCommand, PrintCountCommand, ModelNameCommand, PrePrintCommand, \
-    PrinterLockCommand
+    PrinterLockCommand, ResetCommand, PrepImageCommand
 from pprint import pprint
 
 
@@ -51,6 +51,7 @@ class TestServer:
                         payload = header_data + data
                         print(('received: %s' % self.printByteArray(payload)))
                         response = self.processIncomingMessage(payload)
+                        print(('sending: %s' % self.printByteArray(response)))
                         client.send(response)
                     print('--------------------------------------------------')
                 else:
@@ -85,6 +86,10 @@ class TestServer:
             return self.processPrePrintCommand(decodedPacket)
         elif(decodedPacket.TYPE == Packet.MESSAGE_TYPE_LOCK_DEVICE):
             return self.processLockPrinterCommand(decodedPacket)
+        elif(decodedPacket.TYPE == Packet.MESSAGE_TYPE_RESET):
+            return self.processResetCommand(decodedPacket)
+        elif(decodedPacket.TYPE == Packet.MESSAGE_TYPE_PREP_IMAGE):
+            return self.processPrepImageCommand(decodedPacket)
         else:
             print('Unknown Command. Failing!')
 
@@ -163,3 +168,22 @@ class TestServer:
                                                    self.ejecting, self.battery,
                                                    self.printCount)
         return encodedResponse
+
+    def processResetCommand(self, decodedPacket):
+        sessionTime = decodedPacket.header['sessionTime']
+        resPacket = ResetCommand(Packet.MESSAGE_MODE_RESPONSE)
+        encodedResponse = resPacket.encodeResponse(sessionTime,
+                                                   self.returnCode,
+                                                   self.ejecting, self.battery,
+                                                   self.printCount)
+        return encodedResponse
+
+    def processPrepImageCommand(self, decodedPacket):
+        sessionTime = decodedPacket.header['sessionTime']
+        resPacket = PrepImageCommand(Packet.MESSAGE_MODE_RESPONSE, maxLen=60000)
+        encodedResponse = resPacket.encodeResponse(sessionTime,
+                                                   self.returnCode,
+                                                   self.ejecting, self.battery,
+                                                   self.printCount)
+        return encodedResponse
+

@@ -408,6 +408,17 @@ class PacketTests(unittest.TestCase):
         packetFactory.decode(msg)
 
 
+
+    def test_premade_resp_prep(self):
+        """Test Decoding a Prep Response."""
+        msg = bytearray.fromhex('2451 001c 9b60 d511 0457'
+                                ' 0000 1000 0015 f900 0000'
+                                '  0000 0000 fc14 0d0a')
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(msg)
+        decodedPacket.printDebug()
+
+
 if __name__ == '__main__':
 
     unittest.main()

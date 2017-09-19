@@ -58,6 +58,8 @@ class PacketFactory(object):
             return(PrePrintCommand(mode=self.mode, byteArray=byteArray))
         elif pType == self.MESSAGE_TYPE_LOCK_DEVICE:
             return(PrinterLockCommand(mode=self.mode, byteArray=byteArray))
+        elif pType == self.MESSAGE_TYPE_PREP_IMAGE:
+            return(PrepImageCommand(mode=self.mode, byteArray=byteArray))
         else:
             print("Unknown Packet Type: " + str(pType))
 
@@ -781,7 +783,7 @@ class PrinterLockCommand(Packet):
 
     def encodeRespPayload(self):
         """Encode Response Payload."""
-        return {}
+        return bytearray()
 
     def decodeRespPayload(self, byteArray):
         """Decode Response Payload."""
@@ -794,8 +796,7 @@ class ResetCommand(Packet):
     NAME = "Reset"
     TYPE = Packet.MESSAGE_TYPE_RESET
 
-    def __init__(self, mode, byteArray=None, returnCode=None, unknown1=None,
-                 ejecting=None, unknown2=None):
+    def __init__(self, mode, byteArray=None):
         """Initialise Reset Command Packet."""
         super(ResetCommand, self).__init__(mode)
         self.payload = {}
@@ -815,7 +816,7 @@ class ResetCommand(Packet):
 
     def encodeComPayload(self):
         """Encode Command Payload."""
-        return {}
+        return bytearray()
 
     def decodeComPayload(self, byteArray):
         """Decode the Command Payload."""
@@ -823,7 +824,7 @@ class ResetCommand(Packet):
 
     def encodeRespPayload(self):
         """Encode Response Payload."""
-        return {}
+        return bytearray()
 
     def decodeRespPayload(self, byteArray):
         """Decode Response Payload."""
@@ -831,39 +832,57 @@ class ResetCommand(Packet):
 
 
 class PrepImageCommand(Packet):
-    NAME = "Image Prepare"
+    """Prep Image Command."""
 
-    def __init__(self, mode, byteArray=None, format=None, options=None, length=None, unknown1=None):
+    NAME = "PrepImage"
+    TYPE = Packet.MESSAGE_TYPE_PREP_IMAGE
+
+    def __init__(self, mode, byteArray=None, format=None, options=None,
+                 imgLength=None, maxLen=None):
+        """Initialise Prep Image Command Packet."""
         super(PrepImageCommand, self).__init__(mode)
+        self.payload = {}
+        self.mode = mode
         if (byteArray is not None):
-            self.header = super(PrepImageCommand, self).decodeHeader(mode, byteArray)
-            self.valid = self.validatePacket(byteArray, self.header['packetLength'])
+            self.byteArray = byteArray
+            self.header = super(PrepImageCommand,
+                                self).decodeHeader(mode, byteArray)
+            self.valid = self.validatePacket(byteArray,
+                                             self.header['packetLength'])
             if(mode == self.MESSAGE_MODE_COMMAND):
-                self.decodedCommandPayload = self.decodeCommand(byteArray)
-            elif(mode ==self.MESSAGE_MODE_RESPONSE):
-                self.decodedCommandPayload = self.decodeResponse(byteArray)
-            #super(PrepImageCommand, self).printDebug(byteArray, mode, self.NAME, self.header, self.decodedCommandPayload)
+                self.decodedCommandPayload = self.decodeComPayload(byteArray)
+            elif(mode == self.MESSAGE_MODE_RESPONSE):
+                self.decodedCommandPayload = self.decodeRespPayload(byteArray)
         else:
-            print("Building new Image Prepare Command")
+            self.mode = mode
+            self.maxLen = maxLen
 
+    def encodeComPayload(self):
+        """Encode Command Payload."""
+        return bytearray()
 
-    def decodeCommand(self, byteArray):
-        self.format  = self.getOneByteInt(12, byteArray)
+    def decodeComPayload(self, byteArray):
+        """Decode the Command Payload."""
+        self.format = self.getOneByteInt(12, byteArray)
         self.options = self.getOneByteInt(13, byteArray)
-        self.length  = self.getFourByteInt(14, byteArray)
+        self.imgLength = self.getFourByteInt(14, byteArray) 
+
         self.payload = {
-            'format' : self.format,
-            'options'  : self.options,
-            'length': self.length
+            'format': self.format,
+            'options': self.options,
+            'imgLength': self.imgLength
         }
         return self.payload
 
-    def decodeResponse(self, byteArray):
-        self.unkown1  = self.getTwoByteInt(18, byteArray)
-        self.payload = {
-            'unkown1' : self.unkown1
-        }
-        return self.payload
+    def encodeRespPayload(self):
+        """Encode Response Payload."""
+        payload = bytearray(2)
+        payload = payload + self.encodeTwoByteInt(self.maxLen)
+        return payload
+
+    def decodeRespPayload(self, byteArray):
+        """Decode Response Payload."""
+        return {}
 
 
 class SendImageCommand(Packet):
