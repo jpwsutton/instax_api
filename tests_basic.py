@@ -4,7 +4,8 @@ Instax SP2 Test File.
 @jpwsutton 2016/17
 """
 from instax import PacketFactory, Packet, SpecificationsCommand,  \
-    VersionCommand, PrintCountCommand, ModelNameCommand, PrePrintCommand
+    VersionCommand, PrintCountCommand, ModelNameCommand, PrePrintCommand, \
+    PrinterLockCommand
 import time
 import unittest
 
@@ -355,37 +356,56 @@ class PacketTests(unittest.TestCase):
         packetFactory = PacketFactory()
         packetFactory.decode(msg)
 
+    def test_encode_cmd_lock(self):
+        """Test encoding a Lock Printer Command."""
+        # Create Model Name Command Packet
+        sessionTime = int(round(time.time() * 1000))
+        pinCode = 1111
+        lockState = 1
+        cmdPacket = PrinterLockCommand(Packet.MESSAGE_MODE_COMMAND,
+                                       lockState=lockState)
+        # Encodde the command to raw byte array
+        encodedCommand = cmdPacket.encodeCommand(sessionTime, pinCode)
+        # Decode the command back into a packet object
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(encodedCommand)
+        postHeader = decodedPacket.header
+        self.helper_verify_header(postHeader,
+                                  Packet.MESSAGE_MODE_COMMAND,
+                                  Packet.MESSAGE_TYPE_LOCK_DEVICE,
+                                  len(encodedCommand),
+                                  cmdPacket.encodedSessionTime,
+                                  pinCode)
+        # Verify Payload
+        self.assertEqual(decodedPacket.payload['lockState'], lockState)
+
     def test_premade_cmd_lock(self):
         """Test Decoding a Lock Command."""
         msg = bytearray.fromhex('24b3 0014 9619 02df 0457'
                                 ' 0000 0100 0000 fd28 0d0a')
         packetFactory = PacketFactory()
-        decodedPacket = packetFactory.decode(msg)
-        decodedPacket.printDebug()
+        packetFactory.decode(msg)
 
     def test_premade_resp_lock(self):
         """Test Decoding a Lock Response."""
         msg = bytearray.fromhex('2ab3 0014 75b8 bd8e 0000'
                                 ' 0000 0000 003a fc5c 0d0a')
         packetFactory = PacketFactory()
-        decodedPacket = packetFactory.decode(msg)
-        decodedPacket.printDebug()
+        packetFactory.decode(msg)
 
     def test_premade_cmd_reset(self):
         """Test Decoding a Reset Command."""
         msg = bytearray.fromhex('2450 0010 96c9 aada 0457'
                                 ' 0000 fc3d 0d0a')
         packetFactory = PacketFactory()
-        decodedPacket = packetFactory.decode(msg)
-        decodedPacket.printDebug()
+        packetFactory.decode(msg)
 
     def test_premade_resp_reset(self):
         """Test Decoding a Reset Response."""
         msg = bytearray.fromhex('2a50 0014 75b8 bd8e 0000'
                                 ' 0000 0000 003a fcbf 0d0a')
         packetFactory = PacketFactory()
-        decodedPacket = packetFactory.decode(msg)
-        decodedPacket.printDebug()
+        packetFactory.decode(msg)
 
 
 if __name__ == '__main__':

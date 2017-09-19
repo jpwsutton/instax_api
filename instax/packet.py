@@ -745,7 +745,7 @@ class PrinterLockCommand(Packet):
     NAME = "LockPrinter"
     TYPE = Packet.MESSAGE_TYPE_LOCK_DEVICE
 
-    def __init__(self, mode, byteArray=None):
+    def __init__(self, mode, lockState=None, byteArray=None):
         """Initialise Lock Printer Packet."""
         super(PrinterLockCommand, self).__init__(mode)
         self.payload = {}
@@ -762,10 +762,14 @@ class PrinterLockCommand(Packet):
                 self.decodedCommandPayload = self.decodeRespPayload(byteArray)
         else:
             self.mode = mode
+            self.lockState = lockState
 
     def encodeComPayload(self):
         """Encode Command Payload."""
-        return {}
+        payload = bytearray()
+        payload = payload + self.encodeOneByteInt(self.lockState)
+        payload = payload + self.encodeOneByteInt(0)
+        return payload
 
     def decodeComPayload(self, byteArray):
         """Decode the Command Payload."""
