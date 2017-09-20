@@ -407,13 +407,18 @@ class PacketTests(unittest.TestCase):
         packetFactory = PacketFactory()
         packetFactory.decode(msg)
 
-
-
     def test_premade_resp_prep(self):
         """Test Decoding a Prep Response."""
         msg = bytearray.fromhex('2451 001c 9b60 d511 0457'
                                 ' 0000 1000 0015 f900 0000'
                                 '  0000 0000 fc14 0d0a')
+        packetFactory = PacketFactory()
+        packetFactory.decode(msg)
+
+    def test_premade_resp_send(self):
+        """Test decoding a send response."""
+        msg = bytearray.fromhex('2a52 0018 75b8 bd8e 0000'
+                                ' 0000 0000 003a 0000 0014 fca5 0d0a')
         packetFactory = PacketFactory()
         decodedPacket = packetFactory.decode(msg)
         decodedPacket.printDebug()

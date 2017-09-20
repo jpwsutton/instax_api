@@ -6,7 +6,7 @@ James Sutton - 2017 - jsutton.co.uk
 import socket
 from .packet import Packet, PacketFactory, SpecificationsCommand, \
     VersionCommand, PrintCountCommand, ModelNameCommand, PrePrintCommand, \
-    PrinterLockCommand, ResetCommand, PrepImageCommand
+    PrinterLockCommand, ResetCommand, PrepImageCommand, SendImageCommand
 from pprint import pprint
 
 
@@ -90,6 +90,8 @@ class TestServer:
             return self.processResetCommand(decodedPacket)
         elif(decodedPacket.TYPE == Packet.MESSAGE_TYPE_PREP_IMAGE):
             return self.processPrepImageCommand(decodedPacket)
+        elif(decodedPacket.TYPE == Packet.MESSAGE_TYPE_SEND_IMAGE):
+            return self.processSendImageCommand(decodedPacket)
         else:
             print('Unknown Command. Failing!')
 
@@ -180,10 +182,20 @@ class TestServer:
 
     def processPrepImageCommand(self, decodedPacket):
         sessionTime = decodedPacket.header['sessionTime']
-        resPacket = PrepImageCommand(Packet.MESSAGE_MODE_RESPONSE, maxLen=60000)
+        resPacket = PrepImageCommand(Packet.MESSAGE_MODE_RESPONSE,
+                                     maxLen=60000)
         encodedResponse = resPacket.encodeResponse(sessionTime,
                                                    self.returnCode,
                                                    self.ejecting, self.battery,
                                                    self.printCount)
         return encodedResponse
 
+    def processSendImageCommand(self, decodedPacket):
+        sessionTime = decodedPacket.header['sessionTime']
+        resPacket = SendImageCommand(Packet.MESSAGE_MODE_RESPONSE,
+                                     maxLen=60000)
+        encodedResponse = resPacket.encodeResponse(sessionTime,
+                                                   self.returnCode,
+                                                   self.ejecting, self.battery,
+                                                   self.printCount)
+        return encodedResponse
