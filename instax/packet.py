@@ -118,7 +118,8 @@ class Packet(object):
         Prints a Byte array in the following format: b1b2 b3b4...
         """
         hexString = ''.join('%02x' % i for i in byteArray)
-        data = ' '.join(hexString[i:i+4] for i in range(0, len(hexString), 4))
+        data = ' '.join(hexString[i:i + 4]
+                        for i in range(0, len(hexString), 4))
         info = (data[:80] + '..') if len(data) > 80 else data
         return(info)
 
@@ -166,7 +167,7 @@ class Packet(object):
         for key in self.payload:
             if(key == 'payloadBytes'):
                 packetPayload['payloadBytes'] = self.printByteArray(
-                                                    self.payload[key])
+                    self.payload[key])
             else:
                 packetPayload[key] = self.payload[key]
         packetObj['payload'] = packetPayload
@@ -213,10 +214,10 @@ class Packet(object):
                 checkSum += (byteArray[checkSumIndex] & 0xFF)
                 checkSumIndex += 1
             if ((byteArray[checkSumIndex + 2] == 13) and
-               (byteArray[checkSumIndex + 3] == 10)):
+                    (byteArray[checkSumIndex + 3] == 10)):
                 expectedCB = (checkSum +
                               (((byteArray[checkSumIndex] & 0xFF) << 8)
-                               | ((byteArray[checkSumIndex+1] & 0xFF) << 0)))
+                               | ((byteArray[checkSumIndex + 1] & 0xFF) << 0)))
                 if (expectedCB & 65535) == 65535:
                     return True
                 else:
@@ -238,13 +239,14 @@ class Packet(object):
         sent to the Instax SP-2.
         """
         self.encodedSessionTime = self.getFourByteInt(
-                                    0,
-                                    self.encodeFourByteInt(sessionTime))
+            0,
+            self.encodeFourByteInt(sessionTime))
         commandPayloadLength = 16 + len(payload)
         commandPayload = bytearray()
         commandPayload.append(mode & 0xFF)  # Start of payload is 36
         commandPayload.append(cmdType & 0xFF)  # The Command bytes
-        commandPayload = commandPayload + self.encodeTwoByteInt(commandPayloadLength)
+        commandPayload = commandPayload + \
+            self.encodeTwoByteInt(commandPayloadLength)
         commandPayload = commandPayload + self.encodeFourByteInt(sessionTime)
         commandPayload = commandPayload + self.encodeTwoByteInt(pinCode)
         commandPayload.append(0)  # Nothing
@@ -271,20 +273,20 @@ class Packet(object):
         sent to the Instax-SP2.
         """
         self.encodedSessionTime = self.getFourByteInt(
-                                    0, self.encodeFourByteInt(sessionTime))
+            0, self.encodeFourByteInt(sessionTime))
         responsePayloadLength = 20 + len(payload)
         responsePayload = bytearray()
         responsePayload.append(mode & 0xFF)  # Start of payload is 42
         responsePayload.append(cmdType & 0xFF)  # The Response type bytes
         responsePayload = responsePayload + self.encodeTwoByteInt(
-                                                responsePayloadLength)
+            responsePayloadLength)
         responsePayload = responsePayload + self.encodeFourByteInt(sessionTime)
         responsePayload = responsePayload + bytearray(4)
         responsePayload = responsePayload + self.encodeOneByteInt(returnCode)
         responsePayload.append(0)  # Nothing
         responsePayload = responsePayload + self.encodeEjecting(0)
         responsePayload = responsePayload + self.encodeBatteryAndPrintCount(
-                                                battery, printCount)
+            battery, printCount)
 
         if(len(payload) > 0):
             responsePayload = responsePayload + payload
@@ -412,7 +414,7 @@ class Packet(object):
         if(len(byteArray) < (offset + 4)):
             return ''
         else:
-            return str(byteArray[offset: offset+4], 'ascii')
+            return str(byteArray[offset: offset + 4], 'ascii')
 
     def getPayloadBytes(self, offset, length, byteArray):
         """Return Payload Bytes."""
@@ -559,9 +561,9 @@ class VersionCommand(Packet):
         """Decode Response payload."""
         self.unknown1 = self.getTwoByteInt(16, byteArray)
         self.firmware = self.formatVersionNumber(
-                            self.getTwoByteInt(18, byteArray))
+            self.getTwoByteInt(18, byteArray))
         self.hardware = self.formatVersionNumber(
-                            self.getTwoByteInt(20, byteArray))
+            self.getTwoByteInt(20, byteArray))
         self.payload = {
             'unknown1': self.unknown1,
             'firmware': self.firmware,
@@ -855,11 +857,18 @@ class PrepImageCommand(Packet):
                 self.decodedCommandPayload = self.decodeRespPayload(byteArray)
         else:
             self.mode = mode
+            self.format = format
+            self.options = options
+            self.imgLength = imgLength
             self.maxLen = maxLen
 
     def encodeComPayload(self):
         """Encode Command Payload."""
-        return bytearray()
+        payload = bytearray()
+        payload = payload + self.encodeOneByteInt(self.format)
+        payload = payload + self.encodeOneByteInt(self.options)
+        payload = payload + self.encodeFourByteInt(self.imgLength)
+        return payload
 
     def decodeComPayload(self, byteArray):
         """Decode the Command Payload."""
@@ -882,15 +891,22 @@ class PrepImageCommand(Packet):
 
     def decodeRespPayload(self, byteArray):
         """Decode Response Payload."""
-        return {}
+        self.maxLen = self.getTwoByteInt(18, byteArray)
+        self.payload = {
+            'maxLen': self.maxLen
+        }
+        return self.payload
 
 
 class SendImageCommand(Packet):
+    """Send Image Command."""
+
     NAME = "Send Image"
     TYPE = Packet.MESSAGE_TYPE_SEND_IMAGE
 
     def __init__(self, mode, byteArray=None, sequenceNumber=None,
                  payloadBytes=None):
+        """Initialise Send Image Command Packet."""
         super(SendImageCommand, self).__init__(mode)
         self.payload = {}
         self.mode = mode

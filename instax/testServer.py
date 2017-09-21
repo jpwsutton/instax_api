@@ -11,6 +11,7 @@ from pprint import pprint
 
 
 class TestServer:
+
     """A Test Server for the Instax Library."""
 
     def __init__(self, verbose=False, log=None, host='0.0.0.0', port=8080,
@@ -62,7 +63,7 @@ class TestServer:
     def printByteArray(self, byteArray):
         hexString = ''.join('%02x' % i for i in byteArray)
         return(' '.join(hexString[i:i + 4] for i in range(
-                0, len(hexString), 4)))
+            0, len(hexString), 4)))
 
     def processIncomingMessage(self, payload):
         """Takes an incoming message and returns the response"""
@@ -101,8 +102,10 @@ class TestServer:
                                    unknown1=254,
                                    firmware=275,
                                    hardware=0)
-        encodedResponse = resPacket.encodeResponse(sessionTime, self.returnCode,
-                                                   self.ejecting, self.battery,
+        encodedResponse = resPacket.encodeResponse(sessionTime,
+                                                   self.returnCode,
+                                                   self.ejecting,
+                                                   self.battery,
                                                    self.printCount)
         return encodedResponse
 
@@ -116,8 +119,10 @@ class TestServer:
                                           maxMsgSize=60000,
                                           unknown2=16,
                                           unknown3=0)
-        encodedResponse = resPacket.encodeResponse(sessionTime, self.returnCode,
-                                                   self.ejecting, self.battery,
+        encodedResponse = resPacket.encodeResponse(sessionTime,
+                                                   self.returnCode,
+                                                   self.ejecting,
+                                                   self.battery,
                                                    self.printCount)
         return encodedResponse
 
@@ -125,8 +130,10 @@ class TestServer:
         sessionTime = decodedPacket.header['sessionTime']
         resPacket = ModelNameCommand(Packet.MESSAGE_MODE_RESPONSE,
                                      modelName='SP-2')
-        encodedResponse = resPacket.encodeResponse(sessionTime, self.returnCode,
-                                                   self.ejecting, self.battery,
+        encodedResponse = resPacket.encodeResponse(sessionTime,
+                                                   self.returnCode,
+                                                   self.ejecting,
+                                                   self.battery,
                                                    self.printCount)
         return encodedResponse
 
@@ -136,7 +143,8 @@ class TestServer:
                                       printHistory=20)
         encodedResponse = resPacket.encodeResponse(sessionTime,
                                                    self.returnCode,
-                                                   self.ejecting, self.battery,
+                                                   self.ejecting,
+                                                   self.battery,
                                                    self.printCount)
         return encodedResponse
 
@@ -167,7 +175,8 @@ class TestServer:
         resPacket = PrinterLockCommand(Packet.MESSAGE_MODE_RESPONSE)
         encodedResponse = resPacket.encodeResponse(sessionTime,
                                                    self.returnCode,
-                                                   self.ejecting, self.battery,
+                                                   self.ejecting,
+                                                   self.battery,
                                                    self.printCount)
         return encodedResponse
 
@@ -176,7 +185,8 @@ class TestServer:
         resPacket = ResetCommand(Packet.MESSAGE_MODE_RESPONSE)
         encodedResponse = resPacket.encodeResponse(sessionTime,
                                                    self.returnCode,
-                                                   self.ejecting, self.battery,
+                                                   self.ejecting,
+                                                   self.battery,
                                                    self.printCount)
         return encodedResponse
 
@@ -186,7 +196,8 @@ class TestServer:
                                      maxLen=60000)
         encodedResponse = resPacket.encodeResponse(sessionTime,
                                                    self.returnCode,
-                                                   self.ejecting, self.battery,
+                                                   self.ejecting,
+                                                   self.battery,
                                                    self.printCount)
         return encodedResponse
 
@@ -196,6 +207,7 @@ class TestServer:
                                      maxLen=60000)
         encodedResponse = resPacket.encodeResponse(sessionTime,
                                                    self.returnCode,
-                                                   self.ejecting, self.battery,
+                                                   self.ejecting,
+                                                   self.battery,
                                                    self.printCount)
         return encodedResponse
