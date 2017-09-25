@@ -3,7 +3,9 @@ import time
 import queue
 from .exceptions import CommandTimedOutException, ConnectError, CommandError
 from .response import Response, ResponseCode, PrinterStatus
-from .packet import Packet, SpecificationsCommand
+from .packet import PacketFactory, Packet, SpecificationsCommand,  \
+    VersionCommand, PrintCountCommand, ModelNameCommand, PrePrintCommand, \
+    PrinterLockCommand, ResetCommand, PrepImageCommand
 
 
 class SP2:
@@ -12,8 +14,6 @@ class SP2:
 
     def __init__(self):
         print("Initialising Instax SP-2 class")
-        self.commands = Commands()
-        self.utilities = Utilities()
         self.comms = SocketClientThread()
         self.comms.start()
         self.currentTimeMillis = int(round(time.time() * 1000))
@@ -106,17 +106,20 @@ class SP2:
     def getPrinterSpecifications(self):
         print("Getting printer specification... 79")
         cmdPacket = SpecificationsCommand(PacketFactory.MESSAGE_MODE_COMMAND)
-        encodedPacket = self.packetFactory.encodeCommand(cmdPacket, self.currentTimeMillis, self.pinCode)
-        print("Sending: ", self.utilities.printByteArray(encodedPacket))
-        reply = self.send_and_recieve(commandPayload, 5)
-        print("Response: ", self.utilities.printByteArray(reply.data))
-        response = self.commands.processResponse(
-            reply.data, self.currentTimeMillis, 79)
-        if(response.responseCode == ResponseCode.RET_OK):
-            return response
-        else:
-            print("The response failed verification")
+        encodedPacket = cmdPacket.encodeCommand(self.currentTimeMillis,
+                                                self.pinCode)
+        reply = self.send_and_recieve(encodedPacket, 5)
+        decodedResponse = self.packetFactory.decode(reply.data)
+        return decodedResponse
 
+    def sendPrePrintCommand(self, cmdNumber):
+        """Send a PrePrint Command."""
+        cmdPacket = PrePrintCommand(Packet.MESSAGE_MODE_COMMAND, cmdNumber=cmdNumber)
+        encodedPacket = cmdPacket.encodeCommand(self.currentTimeMillis,
+                                                self.pinCode)
+        reply = self.send_and_recieve(encodedPacket, 5)
+        decodedResponse = self.packetFactory.decode(reply.data)
+        return decodedResponse
 
     def close(self, timeout=10):
         print("Closing connection to Instax SP2")
