@@ -7,11 +7,13 @@ import socket
 from .packet import Packet, PacketFactory, SpecificationsCommand, \
     VersionCommand, PrintCountCommand, ModelNameCommand, PrePrintCommand, \
     PrinterLockCommand, ResetCommand, PrepImageCommand, SendImageCommand
-from pprint import pprint
+import signal
+import sys
+import time
+import json
 
 
 class TestServer:
-
     """A Test Server for the Instax Library."""
 
     def __init__(self, verbose=False, log=None, host='0.0.0.0', port=8080,
@@ -29,16 +31,20 @@ class TestServer:
         self.battery = battery
         self.printCount = total
         self.remaining = remaining
+        self.running = True
+        self.finished = False
+        self.messageLog = []
 
     def start(self):
         """Start the Server."""
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.bind((self.host, self.port))
         self.socket.listen(self.backlog)
+        signal.signal(signal.SIGINT, self.signal_handler)
         print(('Server Listening on %s port %s' % (self.host, self.port)))
-        while True:
+        while self.running:
             client, address = self.socket.accept()
-            while True:
+            while self.running:
                 header_data = client.recv(4)
                 if(len(header_data) > 1):
                     print('--------------------------------------------------')
@@ -59,44 +65,63 @@ class TestServer:
                     print('No data, closing client')
                     client.close()
                     break
+        self.finished = True
+
+    def signal_handler(self, signal, frame):
+        """Handle Ctrl+C events."""
+        print()
+        print('You pressed Ctrl+C! Saving Log and shutting down.')
+        timestr = time.strftime("%Y%m%d-%H%M%S")
+        filename = "instaxServer-" + timestr + ".json"
+        print("Saving Log to: %s" % filename)
+        with open(filename, 'w') as outfile:
+            json.dump(self.messageLog, outfile, indent=4)
+        print("Log file written, have a nice day!")
+        sys.exit(0)
 
     def printByteArray(self, byteArray):
+        """Print a byte array."""
         hexString = ''.join('%02x' % i for i in byteArray)
         return(' '.join(hexString[i:i + 4] for i in range(
             0, len(hexString), 4)))
 
     def processIncomingMessage(self, payload):
-        """Takes an incoming message and returns the response"""
+        """Take an incoming message and return the response."""
         packetFactory = PacketFactory()
         decodedPacket = packetFactory.decode(payload)
         decodedPacket.printDebug()
         decodedPacketObj = decodedPacket.getPacketObject()
+        self.messageLog.append(decodedPacketObj)
         print("****************************************")
-        pprint(decodedPacketObj)
-        print("****************************************")
+        response = None
 
         if(decodedPacket.TYPE == Packet.MESSAGE_TYPE_PRINTER_VERSION):
-            return self.processVersionCommand(decodedPacket)
+            response = self.processVersionCommand(decodedPacket)
         elif(decodedPacket.TYPE == Packet.MESSAGE_TYPE_SPECIFICATIONS):
-            return self.processSpecificationsCommand(decodedPacket)
+            response = self.processSpecificationsCommand(decodedPacket)
         elif(decodedPacket.TYPE == Packet.MESSAGE_TYPE_MODEL_NAME):
-            return self.processModelNameCommand(decodedPacket)
+            response = self.processModelNameCommand(decodedPacket)
         elif(decodedPacket.TYPE == Packet.MESSAGE_TYPE_PRINT_COUNT):
-            return self.processPrintCountCommand(decodedPacket)
+            response = self.processPrintCountCommand(decodedPacket)
         elif(decodedPacket.TYPE == Packet.MESSAGE_TYPE_PRE_PRINT):
-            return self.processPrePrintCommand(decodedPacket)
+            response = self.processPrePrintCommand(decodedPacket)
         elif(decodedPacket.TYPE == Packet.MESSAGE_TYPE_LOCK_DEVICE):
-            return self.processLockPrinterCommand(decodedPacket)
+            response = self.processLockPrinterCommand(decodedPacket)
         elif(decodedPacket.TYPE == Packet.MESSAGE_TYPE_RESET):
-            return self.processResetCommand(decodedPacket)
+            response = self.processResetCommand(decodedPacket)
         elif(decodedPacket.TYPE == Packet.MESSAGE_TYPE_PREP_IMAGE):
-            return self.processPrepImageCommand(decodedPacket)
+            response = self.processPrepImageCommand(decodedPacket)
         elif(decodedPacket.TYPE == Packet.MESSAGE_TYPE_SEND_IMAGE):
-            return self.processSendImageCommand(decodedPacket)
+            response = self.processSendImageCommand(decodedPacket)
         else:
             print('Unknown Command. Failing!')
 
+        decodedResponsePacket = packetFactory.decode(response)
+        self.messageLog.append(decodedResponsePacket.getPacketObject())
+        return response
+
     def processVersionCommand(self, decodedPacket):
+        """Process a version command."""
         sessionTime = decodedPacket.header['sessionTime']
         resPacket = VersionCommand(Packet.MESSAGE_MODE_RESPONSE,
                                    unknown1=254,
@@ -110,6 +135,7 @@ class TestServer:
         return encodedResponse
 
     def processSpecificationsCommand(self, decodedPacket):
+        """Process a specifications command."""
         sessionTime = decodedPacket.header['sessionTime']
         resPacket = SpecificationsCommand(Packet.MESSAGE_MODE_RESPONSE,
                                           maxHeight=800,
@@ -127,6 +153,7 @@ class TestServer:
         return encodedResponse
 
     def processModelNameCommand(self, decodedPacket):
+        """Process a model name command."""
         sessionTime = decodedPacket.header['sessionTime']
         resPacket = ModelNameCommand(Packet.MESSAGE_MODE_RESPONSE,
                                      modelName='SP-2')
@@ -138,6 +165,7 @@ class TestServer:
         return encodedResponse
 
     def processPrintCountCommand(self, decodedPacket):
+        """Process a Print Count command."""
         sessionTime = decodedPacket.header['sessionTime']
         resPacket = PrintCountCommand(Packet.MESSAGE_MODE_RESPONSE,
                                       printHistory=20)
@@ -149,6 +177,7 @@ class TestServer:
         return encodedResponse
 
     def processPrePrintCommand(self, decodedPacket):
+        """Process a Pre Print command."""
         cmdNumber = decodedPacket.payload['cmdNumber']
         if(cmdNumber in [6, 7, 8]):
             respNumber = 0
@@ -171,6 +200,7 @@ class TestServer:
         return encodedResponse
 
     def processLockPrinterCommand(self, decodedPacket):
+        """Process a Lock Printer Command."""
         sessionTime = decodedPacket.header['sessionTime']
         resPacket = PrinterLockCommand(Packet.MESSAGE_MODE_RESPONSE)
         encodedResponse = resPacket.encodeResponse(sessionTime,
@@ -181,6 +211,7 @@ class TestServer:
         return encodedResponse
 
     def processResetCommand(self, decodedPacket):
+        """Process a Rest command."""
         sessionTime = decodedPacket.header['sessionTime']
         resPacket = ResetCommand(Packet.MESSAGE_MODE_RESPONSE)
         encodedResponse = resPacket.encodeResponse(sessionTime,
@@ -191,6 +222,7 @@ class TestServer:
         return encodedResponse
 
     def processPrepImageCommand(self, decodedPacket):
+        """Process a Prep Image Commnand."""
         sessionTime = decodedPacket.header['sessionTime']
         resPacket = PrepImageCommand(Packet.MESSAGE_MODE_RESPONSE,
                                      maxLen=60000)
@@ -202,6 +234,7 @@ class TestServer:
         return encodedResponse
 
     def processSendImageCommand(self, decodedPacket):
+        """Process a Send Image Command."""
         sessionTime = decodedPacket.header['sessionTime']
         resPacket = SendImageCommand(Packet.MESSAGE_MODE_RESPONSE,
                                      maxLen=60000)
