@@ -31,6 +31,12 @@ class PacketFactory(object):
     def __init__(self):
         """Init for Packet Factory."""
         pass
+    
+    def printRawByteArray(self, byteArray):
+        """Print a byte array fully."""
+        hexString = ''.join('%02x' % i for i in byteArray)
+        return(' '.join(hexString[i:i + 4] for i in range(
+            0, len(hexString), 4)))
 
     def decode(self, byteArray):
         """Decode a byte array into an instax Packet."""
@@ -62,6 +68,7 @@ class PacketFactory(object):
             return(PrepImageCommand(mode=self.mode, byteArray=byteArray))
         else:
             print("Unknown Packet Type: " + str(pType))
+            print("Packet Bytes: [" + self.printRawByteArray(byteArray) + "]")
 
 
 class Packet(object):
@@ -122,6 +129,12 @@ class Packet(object):
                         for i in range(0, len(hexString), 4))
         info = (data[:80] + '..') if len(data) > 80 else data
         return(info)
+    
+    def printRawByteArray(self, byteArray):
+        """Print a byte array fully."""
+        hexString = ''.join('%02x' % i for i in byteArray)
+        return(' '.join(hexString[i:i + 4] for i in range(
+            0, len(hexString), 4)))
 
     def printDebug(self):
         """Print Debug information about packet."""
@@ -161,7 +174,7 @@ class Packet(object):
     def getPacketObject(self):
         """Return a simple object containing all packet details."""
         packetObj = {}
-        packetObj['bytes'] = self.printByteArray(self.byteArray)
+        packetObj['bytes'] = self.printRawByteArray(self.byteArray)
         packetObj['header'] = self.header
         packetPayload = {}
         for key in self.payload:
@@ -922,10 +935,12 @@ class SendImageCommand(Packet):
                 self.decodedCommandPayload = self.decodeRespPayload(byteArray)
         else:
             self.mode = mode
-            print("Building new Image Send Command")
+            self.sequenceNumber = sequenceNumber
+            self.payloadBytes = payloadBytes
 
     def encodeComPayload(self):
         """Encode Command Payload."""
+        # TODO
         return bytearray()
 
     def decodeComPayload(self, byteArray):
@@ -942,20 +957,14 @@ class SendImageCommand(Packet):
 
     def encodeRespPayload(self):
         """Encode Response Payload."""
-        payload = bytearray(2)
-        payload = payload + self.encodeTwoByteInt(self.maxLen)
+        payload = bytearray(3)
+        payload = payload + self.encodeOneByteInt(self.sequenceNumber)
         return payload
 
     def decodeRespPayload(self, byteArray):
         """Decode Response Payload."""
-        self.unknown1 = self.getOneByteInt(16, byteArray)
-        self.unknown2 = self.getOneByteInt(17, byteArray)
-        self.unknown3 = self.getOneByteInt(18, byteArray)
-        self.unknown4 = self.getOneByteInt(19, byteArray)
+        self.sequenceNumber = self.getOneByteInt(19, byteArray)
         self.payload = {
-            'unknown1': self.unknown1,
-            'unknown2': self.unknown2,
-            'unknown3': self.unknown3,
-            'unknown4': self.unknown4
-        }
+            'sequenceNumber': self.sequenceNumber
+            }
         return self.payload

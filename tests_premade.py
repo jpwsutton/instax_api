@@ -126,6 +126,13 @@ class PacketTests(unittest.TestCase):
         packetFactory = PacketFactory()
         decodedPacket = packetFactory.decode(msg)
         decodedPacket.printDebug()
+        
+    def test_premade_cmd_83(self):
+        """Test decoding a type 83 command."""
+        msg = bytearray.fromhex('2453 0010 c9a9 b71e 0457 0000 fcd6 0d0a')
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(msg)
+        decodedPacket.printDebug()
 
 
 if __name__ == '__main__':

@@ -11,6 +11,10 @@ import signal
 import sys
 import time
 import json
+import threading
+
+def __init__():
+    print("Let's get this going!")
 
 
 class TestServer:
@@ -34,38 +38,49 @@ class TestServer:
         self.running = True
         self.finished = False
         self.messageLog = []
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.bind((self.host, self.port))
+        signal.signal(signal.SIGINT, self.signal_handler)
 
     def start(self):
         """Start the Server."""
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.bind((self.host, self.port))
         self.socket.listen(self.backlog)
-        signal.signal(signal.SIGINT, self.signal_handler)
         print(('Server Listening on %s port %s' % (self.host, self.port)))
-        while self.running:
+        while True:
             client, address = self.socket.accept()
-            while self.running:
-                header_data = client.recv(4)
-                if(len(header_data) > 1):
-                    print('--------------------------------------------------')
-                    print(('len: %s' % len(header_data)))
-                    print(('header: %s' % self.printByteArray(header_data)))
-                    msg_len = ((header_data[2] & 0xFF) << 8 |
-                               (header_data[3] & 0xFF) << 0)
-                    print(('message length: ', msg_len))
-                    if msg_len:
-                        data = client.recv(msg_len - 4)
-                        payload = header_data + data
-                        print(('received: %s' % self.printByteArray(payload)))
-                        response = self.processIncomingMessage(payload)
-                        print(('sending: %s' % self.printByteArray(response)))
-                        client.send(response)
-                    print('--------------------------------------------------')
-                else:
-                    print('No data, closing client')
-                    client.close()
+            client.settimeout(60)
+            threading.Thread(target = self.listenToClient, args = (client, address)).start()
+
+        
+    def listenToClient(self, client, address):
+        print('New Client Connected')
+        length = None
+        buffer = bytearray()
+        while True:
+            #try:
+            data = client.recv(70000)
+            if not data:
+                break
+            buffer += data
+            while True:  
+                #print(('received: %s' % self.printByteArray(buffer)))
+                if length is None:
+                    length = ((buffer[2] & 0xFF) << 8 |
+                                (buffer[3] & 0xFF) << 0)
+                    print('Length: %s' % str(length))
+                if len(buffer) < length:
                     break
-        self.finished = True
+                
+                response = self.processIncomingMessage(buffer)
+                client.send(response)
+                buffer = bytearray()
+                length = None
+                break
+            #except:
+            #    print('Client disconnected: %s' % sys.exc_info()[0])
+            #    client.close()
+            #    return False
+        
 
     def signal_handler(self, signal, frame):
         """Handle Ctrl+C events."""
@@ -80,19 +95,24 @@ class TestServer:
         sys.exit(0)
 
     def printByteArray(self, byteArray):
-        """Print a byte array."""
+        """Print a Byte Array.
+
+        Prints a Byte array in the following format: b1b2 b3b4...
+        """
         hexString = ''.join('%02x' % i for i in byteArray)
-        return(' '.join(hexString[i:i + 4] for i in range(
-            0, len(hexString), 4)))
+        data = ' '.join(hexString[i:i + 4]
+                        for i in range(0, len(hexString), 4))
+        info = (data[:80] + '..') if len(data) > 80 else data
+        return(info)
 
     def processIncomingMessage(self, payload):
         """Take an incoming message and return the response."""
         packetFactory = PacketFactory()
         decodedPacket = packetFactory.decode(payload)
-        decodedPacket.printDebug()
+        #decodedPacket.printDebug()
         decodedPacketObj = decodedPacket.getPacketObject()
         self.messageLog.append(decodedPacketObj)
-        print("****************************************")
+        print("Processing message type: %s" % decodedPacket.NAME)
         response = None
 
         if(decodedPacket.TYPE == Packet.MESSAGE_TYPE_PRINTER_VERSION):
@@ -236,8 +256,9 @@ class TestServer:
     def processSendImageCommand(self, decodedPacket):
         """Process a Send Image Command."""
         sessionTime = decodedPacket.header['sessionTime']
+        sequenceNumber = decodedPacket.payload['sequenceNumber']
         resPacket = SendImageCommand(Packet.MESSAGE_MODE_RESPONSE,
-                                     maxLen=60000)
+                                     sequenceNumber=sequenceNumber)
         encodedResponse = resPacket.encodeResponse(sessionTime,
                                                    self.returnCode,
                                                    self.ejecting,
