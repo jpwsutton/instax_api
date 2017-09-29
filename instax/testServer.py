@@ -6,15 +6,13 @@ James Sutton - 2017 - jsutton.co.uk
 import socket
 from .packet import Packet, PacketFactory, SpecificationsCommand, \
     VersionCommand, PrintCountCommand, ModelNameCommand, PrePrintCommand, \
-    PrinterLockCommand, ResetCommand, PrepImageCommand, SendImageCommand
+    PrinterLockCommand, ResetCommand, PrepImageCommand, SendImageCommand, \
+    Type83Command
 import signal
 import sys
 import time
 import json
 import threading
-
-def __init__():
-    print("Let's get this going!")
 
 
 class TestServer:
@@ -41,6 +39,7 @@ class TestServer:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.bind((self.host, self.port))
         signal.signal(signal.SIGINT, self.signal_handler)
+        self.imageMap = {}
 
     def start(self):
         """Start the Server."""
@@ -49,38 +48,32 @@ class TestServer:
         while True:
             client, address = self.socket.accept()
             client.settimeout(60)
-            threading.Thread(target = self.listenToClient, args = (client, address)).start()
+            threading.Thread(target=self.listenToClient,
+                             args=(client, address)).start()
 
-        
     def listenToClient(self, client, address):
+        """Interact with client."""
         print('New Client Connected')
         length = None
         buffer = bytearray()
         while True:
-            #try:
             data = client.recv(70000)
             if not data:
                 break
             buffer += data
-            while True:  
-                #print(('received: %s' % self.printByteArray(buffer)))
+            while True:
                 if length is None:
                     length = ((buffer[2] & 0xFF) << 8 |
-                                (buffer[3] & 0xFF) << 0)
+                              (buffer[3] & 0xFF) << 0)
                     print('Length: %s' % str(length))
                 if len(buffer) < length:
                     break
-                
+
                 response = self.processIncomingMessage(buffer)
                 client.send(response)
                 buffer = bytearray()
                 length = None
                 break
-            #except:
-            #    print('Client disconnected: %s' % sys.exc_info()[0])
-            #    client.close()
-            #    return False
-        
 
     def signal_handler(self, signal, frame):
         """Handle Ctrl+C events."""
@@ -93,6 +86,12 @@ class TestServer:
             json.dump(self.messageLog, outfile, indent=4)
         print("Log file written, have a nice day!")
         sys.exit(0)
+
+    def decodeImage(self, segments):
+        """Decode an encoded image."""
+        print("Decoding Image of %s segments." % len(segments))
+        for key, segment in segments.items():
+            print("Segment: %s is %s bytes long" % (key, len(segment)))
 
     def printByteArray(self, byteArray):
         """Print a Byte Array.
@@ -109,7 +108,6 @@ class TestServer:
         """Take an incoming message and return the response."""
         packetFactory = PacketFactory()
         decodedPacket = packetFactory.decode(payload)
-        #decodedPacket.printDebug()
         decodedPacketObj = decodedPacket.getPacketObject()
         self.messageLog.append(decodedPacketObj)
         print("Processing message type: %s" % decodedPacket.NAME)
@@ -133,6 +131,8 @@ class TestServer:
             response = self.processPrepImageCommand(decodedPacket)
         elif(decodedPacket.TYPE == Packet.MESSAGE_TYPE_SEND_IMAGE):
             response = self.processSendImageCommand(decodedPacket)
+        elif(decodedPacket.TYPE == Packet.MESSAGE_TYPE_83):
+            response = self.processType83Command(decodedPacket)
         else:
             print('Unknown Command. Failing!')
 
@@ -257,11 +257,30 @@ class TestServer:
         """Process a Send Image Command."""
         sessionTime = decodedPacket.header['sessionTime']
         sequenceNumber = decodedPacket.payload['sequenceNumber']
+        payloadBytes = decodedPacket.payload['payloadBytes']
         resPacket = SendImageCommand(Packet.MESSAGE_MODE_RESPONSE,
                                      sequenceNumber=sequenceNumber)
+        if sessionTime not in self.imageMap:
+            self.imageMap[sessionTime] = {}
+        self.imageMap[sessionTime][sequenceNumber] = payloadBytes
         encodedResponse = resPacket.encodeResponse(sessionTime,
                                                    self.returnCode,
                                                    self.ejecting,
                                                    self.battery,
                                                    self.printCount)
+        return encodedResponse
+
+    def processType83Command(self, decodedPacket):
+        """Process a Type 83 command."""
+        sessionTime = decodedPacket.header['sessionTime']
+        resPacket = Type83Command(Packet.MESSAGE_MODE_RESPONSE)
+        encodedResponse = resPacket.encodeResponse(sessionTime,
+                                                   self.returnCode,
+                                                   self.ejecting,
+                                                   self.battery,
+                                                   self.printCount)
+        # Start a thread to decode the image
+        imageSegments = self.imageMap[sessionTime]
+        threading.Thread(target=self.decodeImage,
+                         args=(imageSegments)).start()
         return encodedResponse

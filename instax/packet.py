@@ -16,6 +16,7 @@ class PacketFactory(object):
     MESSAGE_TYPE_RESET = 80
     MESSAGE_TYPE_PREP_IMAGE = 81
     MESSAGE_TYPE_SEND_IMAGE = 82
+    MESSAGE_TYPE_83 = 83
     MESSAGE_TYPE_SET_LOCK_STATE = 176
     MESSAGE_TYPE_LOCK_DEVICE = 179
     MESSAGE_TYPE_CHANGE_PASSWORD = 182
@@ -31,7 +32,7 @@ class PacketFactory(object):
     def __init__(self):
         """Init for Packet Factory."""
         pass
-    
+
     def printRawByteArray(self, byteArray):
         """Print a byte array fully."""
         hexString = ''.join('%02x' % i for i in byteArray)
@@ -66,6 +67,8 @@ class PacketFactory(object):
             return(PrinterLockCommand(mode=self.mode, byteArray=byteArray))
         elif pType == self.MESSAGE_TYPE_PREP_IMAGE:
             return(PrepImageCommand(mode=self.mode, byteArray=byteArray))
+        elif pType == self.MESSAGE_TYPE_83:
+            return(Type83Command(mode=self.mode, byteArray=byteArray))
         else:
             print("Unknown Packet Type: " + str(pType))
             print("Packet Bytes: [" + self.printRawByteArray(byteArray) + "]")
@@ -78,6 +81,7 @@ class Packet(object):
     MESSAGE_TYPE_RESET = 80
     MESSAGE_TYPE_PREP_IMAGE = 81
     MESSAGE_TYPE_SEND_IMAGE = 82
+    MESSAGE_TYPE_83 = 83
     MESSAGE_TYPE_SET_LOCK_STATE = 176
     MESSAGE_TYPE_LOCK_DEVICE = 179
     MESSAGE_TYPE_CHANGE_PASSWORD = 182
@@ -129,7 +133,7 @@ class Packet(object):
                         for i in range(0, len(hexString), 4))
         info = (data[:80] + '..') if len(data) > 80 else data
         return(info)
-    
+
     def printRawByteArray(self, byteArray):
         """Print a byte array fully."""
         hexString = ''.join('%02x' % i for i in byteArray)
@@ -968,3 +972,44 @@ class SendImageCommand(Packet):
             'sequenceNumber': self.sequenceNumber
             }
         return self.payload
+
+
+class Type83Command(Packet):
+    """Type 83 Command."""
+
+    NAME = "Type 83"
+    TYPE = Packet.MESSAGE_TYPE_83
+
+    def __init__(self, mode, byteArray=None):
+        """Initialise Type 83 Command Packet."""
+        super(Type83Command, self).__init__(mode)
+        self.payload = {}
+        self.mode = mode
+        if(byteArray is not None):
+            self.byteArray = byteArray
+            self.header = super(Type83Command, self).decodeHeader(mode,
+                                                                  byteArray)
+            self.valid = self.validatePacket(byteArray,
+                                             self.header['packetLength'])
+            if(mode == self.MESSAGE_MODE_COMMAND):
+                self.decodedCommandPayload = self.decodeComPayload(byteArray)
+            elif(mode == self.MESSAGE_MODE_RESPONSE):
+                self.decodedCommandPayload = self.decodeRespPayload(byteArray)
+        else:
+            self.mode = mode
+
+    def encodeComPayload(self):
+        """Encode Command Payload."""
+        return bytearray()
+
+    def decodeComPayload(self, byteArray):
+        """Decode the Command Payload."""
+        return {}
+
+    def encodeRespPayload(self):
+        """Encode Response Payload."""
+        return bytearray()
+
+    def decodeRespPayload(self, byteArray):
+        """Decode Response Payload."""
+        return {}
