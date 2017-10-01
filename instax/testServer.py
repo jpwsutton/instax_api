@@ -90,8 +90,23 @@ class TestServer:
     def decodeImage(self, segments):
         """Decode an encoded image."""
         print("Decoding Image of %s segments." % len(segments))
+        combined = bytearray()
         for key, segment in segments.items():
-            print("Segment: %s is %s bytes long" % (key, len(segment)))
+            print ("SEGMENT KEY: %s - type %s" % (key, type(key)))
+        for seg_key in range(len(segments)):
+            print("Combinding segment %s" % seg_key)
+            combined += segments[seg_key]
+        print("Combined image is %s bytes long" % len(combined))
+        timestr = time.strftime("%Y%m%d-%H%M%S")
+        filename = "encodedImage-" + timestr + ".instax"
+        print("Saving combined image to: %s" % filename)
+        hexString = ''.join('%02x' % i for i in combined)
+        data = ' '.join(hexString[i:i + 4]
+                        for i in range(0, len(hexString), 4))
+        with open(filename, 'wb') as outfile:
+            outfile.write(combined)
+        print("Image file written, have a nice day!")
+        
 
     def printByteArray(self, byteArray):
         """Print a Byte Array.
@@ -282,5 +297,5 @@ class TestServer:
         # Start a thread to decode the image
         imageSegments = self.imageMap[sessionTime]
         threading.Thread(target=self.decodeImage,
-                         args=(imageSegments)).start()
+                         args=(imageSegments,)).start()
         return encodedResponse
