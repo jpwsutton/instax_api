@@ -65,7 +65,6 @@ class TestServer:
                 if length is None:
                     length = ((buffer[2] & 0xFF) << 8 |
                               (buffer[3] & 0xFF) << 0)
-                    print('Length: %s' % str(length))
                 if len(buffer) < length:
                     break
 
@@ -92,7 +91,7 @@ class TestServer:
         print("Decoding Image of %s segments." % len(segments))
         combined = bytearray()
         for key, segment in segments.items():
-            print ("SEGMENT KEY: %s - type %s" % (key, type(key)))
+            print ("SEGMENT %s - length %s" % (key, len(segment)))
         for seg_key in range(len(segments)):
             print("Combinding segment %s" % seg_key)
             combined += segments[seg_key]
@@ -273,6 +272,7 @@ class TestServer:
         sessionTime = decodedPacket.header['sessionTime']
         sequenceNumber = decodedPacket.payload['sequenceNumber']
         payloadBytes = decodedPacket.payload['payloadBytes']
+        decodedPacket.printDebug()
         resPacket = SendImageCommand(Packet.MESSAGE_MODE_RESPONSE,
                                      sequenceNumber=sequenceNumber)
         if sessionTime not in self.imageMap:

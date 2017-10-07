@@ -435,7 +435,7 @@ class Packet(object):
 
     def getPayloadBytes(self, offset, length, byteArray):
         """Return Payload Bytes."""
-        return byteArray[offset:offset + length + 1]
+        return byteArray[offset:offset + length]
 
 
 class SpecificationsCommand(Packet):
@@ -951,8 +951,9 @@ class SendImageCommand(Packet):
         """Decode the Command Payload."""
         self.sequenceNumber = self.getFourByteInt(12, byteArray)
         payloadBytesLength = self.header['packetLength'] - 20
-        self.payloadBytes = self.getPayloadBytes(16, payloadBytesLength + 2,
+        self.payloadBytes = self.getPayloadBytes(16, payloadBytesLength,
                                                  byteArray)
+        print("PayloadBytesdLength: %s, actual: %s" % (payloadBytesLength, len(self.payloadBytes)))
         self.payload = {
             'sequenceNumber': self.sequenceNumber,
             'payloadBytes': self.payloadBytes
