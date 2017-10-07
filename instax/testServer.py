@@ -7,7 +7,8 @@ import socket
 from .packet import Packet, PacketFactory, SpecificationsCommand, \
     VersionCommand, PrintCountCommand, ModelNameCommand, PrePrintCommand, \
     PrinterLockCommand, ResetCommand, PrepImageCommand, SendImageCommand, \
-    Type83Command
+    Type83Command, Type195Command
+from .instaxImage import InstaxImage
 import signal
 import sys
 import time
@@ -90,22 +91,15 @@ class TestServer:
         """Decode an encoded image."""
         print("Decoding Image of %s segments." % len(segments))
         combined = bytearray()
-        for key, segment in segments.items():
-            print ("SEGMENT %s - length %s" % (key, len(segment)))
         for seg_key in range(len(segments)):
-            print("Combinding segment %s" % seg_key)
             combined += segments[seg_key]
         print("Combined image is %s bytes long" % len(combined))
+        instaxImage = InstaxImage()
+        instaxImage.decodeImage(combined)
         timestr = time.strftime("%Y%m%d-%H%M%S")
-        filename = "encodedImage-" + timestr + ".instax"
-        print("Saving combined image to: %s" % filename)
-        hexString = ''.join('%02x' % i for i in combined)
-        data = ' '.join(hexString[i:i + 4]
-                        for i in range(0, len(hexString), 4))
-        with open(filename, 'wb') as outfile:
-            outfile.write(combined)
-        print("Image file written, have a nice day!")
-        
+        filename = timestr + ".bmp"
+        instaxImage.saveImage(filename)
+        print("Saved image to: %s" % filename)
 
     def printByteArray(self, byteArray):
         """Print a Byte Array.
@@ -147,6 +141,8 @@ class TestServer:
             response = self.processSendImageCommand(decodedPacket)
         elif(decodedPacket.TYPE == Packet.MESSAGE_TYPE_83):
             response = self.processType83Command(decodedPacket)
+        elif(decodedPacket.TYPE == Packet.MESSAGE_TYPE_195):
+            response = self.processType195Command(decodedPacket)
         else:
             print('Unknown Command. Failing!')
 
@@ -272,7 +268,6 @@ class TestServer:
         sessionTime = decodedPacket.header['sessionTime']
         sequenceNumber = decodedPacket.payload['sequenceNumber']
         payloadBytes = decodedPacket.payload['payloadBytes']
-        decodedPacket.printDebug()
         resPacket = SendImageCommand(Packet.MESSAGE_MODE_RESPONSE,
                                      sequenceNumber=sequenceNumber)
         if sessionTime not in self.imageMap:
@@ -298,4 +293,16 @@ class TestServer:
         imageSegments = self.imageMap[sessionTime]
         threading.Thread(target=self.decodeImage,
                          args=(imageSegments,)).start()
+        return encodedResponse
+
+    def processType195Command(self, decodedPacket):
+        """Process a Type 195 command."""
+        decodedPacket.printDebug()
+        sessionTime = decodedPacket.header['sessionTime']
+        resPacket = Type195Command(Packet.MESSAGE_MODE_RESPONSE)
+        encodedResponse = resPacket.encodeResponse(sessionTime,
+                                                   self.returnCode,
+                                                   self.ejecting,
+                                                   self.battery,
+                                                   self.printCount)
         return encodedResponse

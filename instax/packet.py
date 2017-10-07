@@ -23,7 +23,7 @@ class PacketFactory(object):
     MESSAGE_TYPE_PRINTER_VERSION = 192
     MESSAGE_TYPE_PRINT_COUNT = 193
     MESSAGE_TYPE_MODEL_NAME = 194
-    MESSAGE_TYPE_UNKNOWN_2 = 195
+    MESSAGE_TYPE_195 = 195
     MESSAGE_TYPE_PRE_PRINT = 196
 
     MESSAGE_MODE_COMMAND = 36  # Command from Client
@@ -69,6 +69,8 @@ class PacketFactory(object):
             return(PrepImageCommand(mode=self.mode, byteArray=byteArray))
         elif pType == self.MESSAGE_TYPE_83:
             return(Type83Command(mode=self.mode, byteArray=byteArray))
+        elif pType == self.MESSAGE_TYPE_UNKNOWN_2:
+            return(Type195Command(mode=self.mode, byteArray=byteArray))
         else:
             print("Unknown Packet Type: " + str(pType))
             print("Packet Bytes: [" + self.printRawByteArray(byteArray) + "]")
@@ -88,7 +90,7 @@ class Packet(object):
     MESSAGE_TYPE_PRINTER_VERSION = 192
     MESSAGE_TYPE_PRINT_COUNT = 193
     MESSAGE_TYPE_MODEL_NAME = 194
-    MESSAGE_TYPE_UNKNOWN_2 = 195
+    MESSAGE_TYPE_195 = 195
     MESSAGE_TYPE_PRE_PRINT = 196
 
     MESSAGE_MODE_COMMAND = 36  # Command from Client
@@ -953,7 +955,6 @@ class SendImageCommand(Packet):
         payloadBytesLength = self.header['packetLength'] - 20
         self.payloadBytes = self.getPayloadBytes(16, payloadBytesLength,
                                                  byteArray)
-        print("PayloadBytesdLength: %s, actual: %s" % (payloadBytesLength, len(self.payloadBytes)))
         self.payload = {
             'sequenceNumber': self.sequenceNumber,
             'payloadBytes': self.payloadBytes
@@ -990,6 +991,47 @@ class Type83Command(Packet):
             self.byteArray = byteArray
             self.header = super(Type83Command, self).decodeHeader(mode,
                                                                   byteArray)
+            self.valid = self.validatePacket(byteArray,
+                                             self.header['packetLength'])
+            if(mode == self.MESSAGE_MODE_COMMAND):
+                self.decodedCommandPayload = self.decodeComPayload(byteArray)
+            elif(mode == self.MESSAGE_MODE_RESPONSE):
+                self.decodedCommandPayload = self.decodeRespPayload(byteArray)
+        else:
+            self.mode = mode
+
+    def encodeComPayload(self):
+        """Encode Command Payload."""
+        return bytearray()
+
+    def decodeComPayload(self, byteArray):
+        """Decode the Command Payload."""
+        return {}
+
+    def encodeRespPayload(self):
+        """Encode Response Payload."""
+        return bytearray()
+
+    def decodeRespPayload(self, byteArray):
+        """Decode Response Payload."""
+        return {}
+
+
+class Type195Command(Packet):
+    """Type 195 Command."""
+
+    NAME = "Type 195"
+    TYPE = Packet.MESSAGE_TYPE_195
+
+    def __init__(self, mode, byteArray=None):
+        """Initialise Type 195 Command Packet."""
+        super(Type195Command, self).__init__(mode)
+        self.payload = {}
+        self.mode = mode
+        if(byteArray is not None):
+            self.byteArray = byteArray
+            self.header = super(Type195Command, self).decodeHeader(mode,
+                                                                   byteArray)
             self.valid = self.validatePacket(byteArray,
                                              self.header['packetLength'])
             if(mode == self.MESSAGE_MODE_COMMAND):
