@@ -1,8 +1,9 @@
-from PIL import Image, ExifTags, ImageOps
-import sys, io
+from PIL import Image, ImageOps
 
 class InstaxImage:
     'Image Utilities class'
+    printHeight = 600
+    printWidth = 800
 
     def __init__(self):
         pass
@@ -10,12 +11,55 @@ class InstaxImage:
     def loadImage(self, imagePath):
         self.sourceImage = Image.open(imagePath)
 
-    def convertImage(self, crop_type='middle', backgroundColour=(255,255,255,0)):
+    def encodeImage(self):
+        """Encode the loaded Image."""
+        imgWidth, imgHeight = self.myImage.size
+        print("Initial Image Size: W: %s, H: %s" % (imgWidth, imgHeight))
+        # Quick check that it's the right dimensions
+        if(imgWidth + imgHeight != 1400):
+            raise Exception("Image was not 800x600 or 600x800")
+        if(imgWidth != 800):
+            # Rotate the image
+            print("Rotating")
+            self.myImage = self.myImage.rotate(-90, expand=True)
+        print("New Image Size: W: %s, H: %s" % (self.myImage.size))
+        imagePixels = self.myImage.getdata()
+        arrayLen = len(imagePixels) * 3
+        print("Encoded Array Length: %s" % arrayLen)
+        encodedBytes = [None] * arrayLen
+        for h in range(self.printHeight):
+            for w in range(self.printWidth):
+                r, g, b = imagePixels[(h * self.printWidth) + w]
+                redTarget = (((w * self.printHeight) * 3) + (self.printHeight * 0)) + h
+                greenTarget = (((w * self.printHeight) * 3) + (self.printHeight * 1)) + h
+                blueTarget = (((w * self.printHeight) * 3) + (self.printHeight * 2)) + h
+                encodedBytes[redTarget] = int(r)
+                encodedBytes[greenTarget] = int(g)
+                encodedBytes[blueTarget] = int(b)
+        return encodedBytes
+
+    def decodeImage(self, imageBytes):
+        """Decode the byte array into an image."""
+        targetImg = []
+        # Packing the individual colours back together.
+        for h in range(self.printHeight):
+            for w in range(self.printWidth):
+                redTarget = (((w * self.printHeight) * 3) + (self.printHeight * 0)) + h
+                greenTarget = (((w * self.printHeight) * 3) + (self.printHeight * 1)) + h
+                blueTarget = (((w * self.printHeight) * 3) + (self.printHeight * 2)) + h
+                targetImg.append(imageBytes[redTarget])
+                targetImg.append(imageBytes[greenTarget])
+                targetImg.append(imageBytes[blueTarget])
+        preImage = Image.frombytes('RGB', (self.printWidth, self.printHeight), bytes(targetImg))
+        self.myImage = preImage.rotate(90, expand=True)
+
+    def convertImage(self, crop_type='middle',
+                     backgroundColour=(255, 255, 255, 0)):
         """
         Rotate, Resize and Crop the image so that it is the correct
         dimensions for printing to the Instax SP-2
         """
-        maxSize = 600, 800 # The Max Image size
+        maxSize = 800, 600  # The Max Image size
         rotatedImage = rotate_image(self.sourceImage)
         image_ratio = rotatedImage.size[0] / float(rotatedImage.size[1])
 
@@ -34,12 +78,11 @@ class InstaxImage:
 
     def saveImage(self, filename):
         print("Saving Image to: ", filename)
-        self.myImage.save(filename, 'JPEG', quality=100, optimise=True)
+        self.myImage.save(filename, 'BMP', quality=100, optimise=True)
 
     def getBytes(self):
         myBytes = self.myImage.tobytes()
         return myBytes
-
 
 
 def rotate_image(source):
@@ -111,6 +154,7 @@ def rotate_image(source):
             tmpImage = source
     return tmpImage
 
+
 def crop_square(source, size, backgroundColour=(255,255,255,0)):
     """
     Resize and crop a square image to fit the specified size
@@ -122,6 +166,7 @@ def crop_square(source, size, backgroundColour=(255,255,255,0)):
     img = Image.new(mode='RGBA', size=size, color=backgroundColour)
     img.paste(source, offset_tuple)
     return img
+
 
 def crop_rectangle(source, size, crop_type='top'):
     """
