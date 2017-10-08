@@ -5,7 +5,8 @@ Instax SP2 Test File.
 """
 from instax import PacketFactory, Packet, SpecificationsCommand,  \
     VersionCommand, PrintCountCommand, ModelNameCommand, PrePrintCommand, \
-    PrinterLockCommand, ResetCommand, PrepImageCommand
+    PrinterLockCommand, ResetCommand, PrepImageCommand, SendImageCommand, \
+    Type83Command, Type195Command, LockStateCommand
 import time
 import unittest
 
@@ -449,11 +450,186 @@ class PacketTests(unittest.TestCase):
 
     def test_encode_cmd_send(self):
         """Test encoding a Send Image Command."""
-        pass
+        sessionTime = int(round(time.time() * 1000))
+        pinCode = 1111
+        sequenceNumber = 5
+        payloadBytes = bytearray(10)
+        cmdPacket = SendImageCommand(Packet.MESSAGE_MODE_COMMAND,
+                                     sequenceNumber=sequenceNumber,
+                                     payloadBytes=payloadBytes)
+        encodedCommand = cmdPacket.encodeCommand(sessionTime, pinCode)
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(encodedCommand)
+        postHeader = decodedPacket.header
+        self.helper_verify_header(postHeader,
+                                  Packet.MESSAGE_MODE_COMMAND,
+                                  Packet.MESSAGE_TYPE_SEND_IMAGE,
+                                  len(encodedCommand),
+                                  cmdPacket.encodedSessionTime,
+                                  pinCode)
+        # Verify Payload
+        self.assertEqual(decodedPacket.payload['sequenceNumber'],
+                         sequenceNumber)
+        self.assertEqual(decodedPacket.payload['payloadBytes'], payloadBytes)
 
     def test_encode_resp_send(self):
         """Test encoding a Send Image Response."""
-        pass
+        sessionTime = int(round(time.time() * 1000))
+        returnCode = Packet.RTN_E_RCV_FRAME
+        ejecting = 0
+        battery = 2
+        printCount = 7
+        sequenceNumber = 5
+        resPacket = SendImageCommand(Packet.MESSAGE_MODE_RESPONSE,
+                                     sequenceNumber=sequenceNumber)
+        encodedResponse = resPacket.encodeResponse(sessionTime, returnCode,
+                                                   ejecting, battery,
+                                                   printCount)
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(encodedResponse)
+        # decodedPacket.printDebug()
+        postHeader = decodedPacket.header
+        self.helper_verify_header(postHeader,
+                                  Packet.MESSAGE_MODE_RESPONSE,
+                                  Packet.MESSAGE_TYPE_SEND_IMAGE,
+                                  len(encodedResponse),
+                                  resPacket.encodedSessionTime,
+                                  returnCode=returnCode,
+                                  ejecting=ejecting,
+                                  battery=battery,
+                                  printCount=printCount)
+
+        # Verify Payload
+        self.assertEqual(decodedPacket.payload['sequenceNumber'],
+                         sequenceNumber)
+
+    def test_encode_cmd_83(self):
+        """Test encoding a Type 83 Command."""
+        sessionTime = int(round(time.time() * 1000))
+        pinCode = 1111
+        cmdPacket = Type83Command(Packet.MESSAGE_MODE_COMMAND)
+        encodedCommand = cmdPacket.encodeCommand(sessionTime, pinCode)
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(encodedCommand)
+        postHeader = decodedPacket.header
+        self.helper_verify_header(postHeader,
+                                  Packet.MESSAGE_MODE_COMMAND,
+                                  Packet.MESSAGE_TYPE_83,
+                                  len(encodedCommand),
+                                  cmdPacket.encodedSessionTime,
+                                  pinCode)
+
+    def test_encode_resp_83(self):
+        """Test encoding a Type 83 Response."""
+        sessionTime = int(round(time.time() * 1000))
+        returnCode = Packet.RTN_E_RCV_FRAME
+        ejecting = 0
+        battery = 2
+        printCount = 7
+        resPacket = Type83Command(Packet.MESSAGE_MODE_RESPONSE)
+        encodedResponse = resPacket.encodeResponse(sessionTime, returnCode,
+                                                   ejecting, battery,
+                                                   printCount)
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(encodedResponse)
+        # decodedPacket.printDebug()
+        postHeader = decodedPacket.header
+        self.helper_verify_header(postHeader,
+                                  Packet.MESSAGE_MODE_RESPONSE,
+                                  Packet.MESSAGE_TYPE_83,
+                                  len(encodedResponse),
+                                  resPacket.encodedSessionTime,
+                                  returnCode=returnCode,
+                                  ejecting=ejecting,
+                                  battery=battery,
+                                  printCount=printCount)
+
+    def test_encode_cmd_195(self):
+        """Test encoding a Type 195 Command."""
+        sessionTime = int(round(time.time() * 1000))
+        pinCode = 1111
+        cmdPacket = Type195Command(Packet.MESSAGE_MODE_COMMAND)
+        encodedCommand = cmdPacket.encodeCommand(sessionTime, pinCode)
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(encodedCommand)
+        postHeader = decodedPacket.header
+        self.helper_verify_header(postHeader,
+                                  Packet.MESSAGE_MODE_COMMAND,
+                                  Packet.MESSAGE_TYPE_195,
+                                  len(encodedCommand),
+                                  cmdPacket.encodedSessionTime,
+                                  pinCode)
+
+    def test_encode_resp_195(self):
+        """Test encoding a Type 195 Response."""
+        sessionTime = int(round(time.time() * 1000))
+        returnCode = Packet.RTN_E_RCV_FRAME
+        ejecting = 0
+        battery = 2
+        printCount = 7
+        resPacket = Type195Command(Packet.MESSAGE_MODE_RESPONSE)
+        encodedResponse = resPacket.encodeResponse(sessionTime, returnCode,
+                                                   ejecting, battery,
+                                                   printCount)
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(encodedResponse)
+        # decodedPacket.printDebug()
+        postHeader = decodedPacket.header
+        self.helper_verify_header(postHeader,
+                                  Packet.MESSAGE_MODE_RESPONSE,
+                                  Packet.MESSAGE_TYPE_195,
+                                  len(encodedResponse),
+                                  resPacket.encodedSessionTime,
+                                  returnCode=returnCode,
+                                  ejecting=ejecting,
+                                  battery=battery,
+                                  printCount=printCount)
+
+    def test_encode_cmd_lock_state(self):
+        """Test encoding a lock state Command."""
+        sessionTime = int(round(time.time() * 1000))
+        pinCode = 1111
+        cmdPacket = LockStateCommand(Packet.MESSAGE_MODE_COMMAND)
+        encodedCommand = cmdPacket.encodeCommand(sessionTime, pinCode)
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(encodedCommand)
+        postHeader = decodedPacket.header
+        self.helper_verify_header(postHeader,
+                                  Packet.MESSAGE_MODE_COMMAND,
+                                  Packet.MESSAGE_TYPE_SET_LOCK_STATE,
+                                  len(encodedCommand),
+                                  cmdPacket.encodedSessionTime,
+                                  pinCode)
+
+    def test_encode_resp_lock_state(self):
+        """Test encoding a lock state Response."""
+        sessionTime = int(round(time.time() * 1000))
+        returnCode = Packet.RTN_E_RCV_FRAME
+        ejecting = 0
+        battery = 2
+        printCount = 7
+        unknownFourByteInt = 100
+        resPacket = LockStateCommand(Packet.MESSAGE_MODE_RESPONSE,
+                                     unknownFourByteInt=unknownFourByteInt)
+        encodedResponse = resPacket.encodeResponse(sessionTime, returnCode,
+                                                   ejecting, battery,
+                                                   printCount)
+        packetFactory = PacketFactory()
+        decodedPacket = packetFactory.decode(encodedResponse)
+        # decodedPacket.printDebug()
+        postHeader = decodedPacket.header
+        self.helper_verify_header(postHeader,
+                                  Packet.MESSAGE_MODE_RESPONSE,
+                                  Packet.MESSAGE_TYPE_SET_LOCK_STATE,
+                                  len(encodedResponse),
+                                  resPacket.encodedSessionTime,
+                                  returnCode=returnCode,
+                                  ejecting=ejecting,
+                                  battery=battery,
+                                  printCount=printCount)
+        # Verify Payload
+        self.assertEqual(decodedPacket.payload['unknownFourByteInt'],
+                         unknownFourByteInt)
 
 
 if __name__ == '__main__':

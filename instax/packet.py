@@ -65,8 +65,6 @@ class PacketFactory(object):
             return(PrePrintCommand(mode=self.mode, byteArray=byteArray))
         elif pType == self.MESSAGE_TYPE_LOCK_DEVICE:
             return(PrinterLockCommand(mode=self.mode, byteArray=byteArray))
-        elif pType == self.MESSAGE_TYPE_PREP_IMAGE:
-            return(PrepImageCommand(mode=self.mode, byteArray=byteArray))
         elif pType == self.MESSAGE_TYPE_83:
             return(Type83Command(mode=self.mode, byteArray=byteArray))
         elif pType == self.MESSAGE_TYPE_195:
@@ -948,8 +946,10 @@ class SendImageCommand(Packet):
 
     def encodeComPayload(self):
         """Encode Command Payload."""
-        # TODO
-        return bytearray()
+        payload = bytearray(0)
+        payload = payload + self.encodeFourByteInt(self.sequenceNumber)
+        payload = payload + self.payloadBytes
+        return payload
 
     def decodeComPayload(self, byteArray):
         """Decode the Command Payload."""

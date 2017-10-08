@@ -2,7 +2,7 @@ from .comms import SocketClientThread, ClientCommand, ClientReply
 import time
 import queue
 from .exceptions import CommandTimedOutException, ConnectError, CommandError
-from .response import Response, ResponseCode, PrinterStatus
+from .response import ResponseCode
 from .packet import PacketFactory, Packet, SpecificationsCommand,  \
     VersionCommand, PrintCountCommand, ModelNameCommand, PrePrintCommand, \
     PrinterLockCommand, ResetCommand, PrepImageCommand

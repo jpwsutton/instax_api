@@ -5,4 +5,4 @@ from .packet import PacketFactory, Packet, SpecificationsCommand, \
                     VersionCommand, PrintCountCommand, PrePrintCommand, \
                     ModelNameCommand, PrinterLockCommand, SendImageCommand, \
                     ResetCommand, PrepImageCommand, Type83Command, \
-                    Type195Command
+                    Type195Command, LockStateCommand

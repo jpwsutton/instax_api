@@ -54,7 +54,6 @@ class PacketTests(unittest.TestCase):
                                 ' 0000 0000 fbb0 0d0a')
         packetFactory = PacketFactory()
         decodedPacket = packetFactory.decode(msg)
-        # decodedPacket.printDebug()
         self.assertEqual(decodedPacket.payload['unknown1'], 257)
         self.assertEqual(decodedPacket.payload['firmware'], '01.13')
         self.assertEqual(decodedPacket.payload['hardware'], '00.00')
@@ -67,7 +66,6 @@ class PacketTests(unittest.TestCase):
                                 ' 0000 f946 0d0a')
         packetFactory = PacketFactory()
         decodedPacket = packetFactory.decode(msg)
-        # decodedPacket.printDebug()
         self.assertEqual(decodedPacket.payload['printHistory'], 3)
 
     def test_premade_cmd_modelName(self):
@@ -124,58 +122,53 @@ class PacketTests(unittest.TestCase):
         msg = bytearray.fromhex('2a52 0018 75b8 bd8e 0000'
                                 ' 0000 0000 003a 0000 0014 fca5 0d0a')
         packetFactory = PacketFactory()
-        decodedPacket = packetFactory.decode(msg)
+        packetFactory.decode(msg)
 
     def test_premade_cmd_83(self):
         """Test decoding a type 83 command."""
         msg = bytearray.fromhex('2453 0010 c9a9 b71e 0457 0000 fcd6 0d0a')
         packetFactory = PacketFactory()
-        decodedPacket = packetFactory.decode(msg)
+        packetFactory.decode(msg)
 
     def test_premade_resp_83(self):
         """Test decoding a type 83 response."""
         msg = bytearray.fromhex('2a53 0014 75b8 bd8e 0000'
                                 ' 0000 0000 003a fcbc 0d0a')
         packetFactory = PacketFactory()
-        decodedPacket = packetFactory.decode(msg)
+        packetFactory.decode(msg)
 
     def test_premade_cmd_lock_state(self):
         """Test decoding a Lock state command."""
         msg = bytearray.fromhex('24b0 0010 f776 ecbe 0457 0000 fba9 0d0a')
         packetFactory = PacketFactory()
-        decodedPacket = packetFactory.decode(msg)
-        decodedPacket.printDebug()
+        packetFactory.decode(msg)
 
     def test_premade_resp_lock_state(self):
         """Test decoding a Lock state response."""
         msg = bytearray.fromhex('2ab0 0018 f130 d7cc 0000 0000'
                                 ' 0000 0036 0000 0064 fbaf 0d0a')
         packetFactory = PacketFactory()
-        decodedPacket = packetFactory.decode(msg)
-        decodedPacket.printDebug()
+        packetFactory.decode(msg)
 
     def test_premade_cmd_195(self):
         """Test decoding a 195 command."""
         msg = bytearray.fromhex('24c3 0010 f130 d7cc 0457 0000 fbe9 0d0a')
         packetFactory = PacketFactory()
-        decodedPacket = packetFactory.decode(msg)
-        decodedPacket.printDebug()
+        packetFactory.decode(msg)
 
     def test_premade_resp_195_first(self):
         """Test decoding a 195 first response."""
         msg = bytearray.fromhex('2ac3 0014 f130 d7cc 0000 0000'
                                 ' 7f00 0436 fb81 0d0a')
         packetFactory = PacketFactory()
-        decodedPacket = packetFactory.decode(msg)
-        decodedPacket.printDebug()
+        packetFactory.decode(msg)
 
     def test_premade_resp_195_last(self):
         """Test decoding a 195 last response."""
         msg = bytearray.fromhex('2ac3 0014 f130 d7cc 0000 0000'
                                 ' 0000 0035 fc05 0d0a')
         packetFactory = PacketFactory()
-        decodedPacket = packetFactory.decode(msg)
-        decodedPacket.printDebug()
+        packetFactory.decode(msg)
 
 
 if __name__ == '__main__':
