@@ -69,8 +69,10 @@ class PacketFactory(object):
             return(PrepImageCommand(mode=self.mode, byteArray=byteArray))
         elif pType == self.MESSAGE_TYPE_83:
             return(Type83Command(mode=self.mode, byteArray=byteArray))
-        elif pType == self.MESSAGE_TYPE_UNKNOWN_2:
+        elif pType == self.MESSAGE_TYPE_195:
             return(Type195Command(mode=self.mode, byteArray=byteArray))
+        elif pType == self.MESSAGE_TYPE_SET_LOCK_STATE:
+            return(LockStateCommand(mode=self.mode, byteArray=byteArray))
         else:
             print("Unknown Packet Type: " + str(pType))
             print("Packet Bytes: [" + self.printRawByteArray(byteArray) + "]")
@@ -1056,3 +1058,51 @@ class Type195Command(Packet):
     def decodeRespPayload(self, byteArray):
         """Decode Response Payload."""
         return {}
+
+
+class LockStateCommand(Packet):
+    """LockState Command."""
+
+    NAME = "Lock State"
+    TYPE = Packet.MESSAGE_TYPE_SET_LOCK_STATE
+
+    def __init__(self, mode, byteArray=None, unknownFourByteInt=None):
+        """Initialise Lock State Command Packet."""
+        super(LockStateCommand, self).__init__(mode)
+        self.payload = {}
+        self.mode = mode
+        if(byteArray is not None):
+            self.byteArray = byteArray
+            self.header = super(LockStateCommand, self).decodeHeader(mode,
+                                                                     byteArray)
+            self.valid = self.validatePacket(byteArray,
+                                             self.header['packetLength'])
+            if(mode == self.MESSAGE_MODE_COMMAND):
+                self.decodedCommandPayload = self.decodeComPayload(byteArray)
+            elif(mode == self.MESSAGE_MODE_RESPONSE):
+                self.decodedCommandPayload = self.decodeRespPayload(byteArray)
+        else:
+            self.mode = mode
+            self.unknownFourByteInt = unknownFourByteInt
+
+    def encodeComPayload(self):
+        """Encode Command Payload."""
+        return bytearray()
+
+    def decodeComPayload(self, byteArray):
+        """Decode the Command Payload."""
+        return {}
+
+    def encodeRespPayload(self):
+        """Encode Response Payload."""
+        payload = bytearray(0)
+        payload = payload + self.encodeFourByteInt(self.unknownFourByteInt)
+        return payload
+
+    def decodeRespPayload(self, byteArray):
+        """Decode Response Payload."""
+        self.unknownFourByteInt = self.getFourByteInt(16, byteArray)
+        self.payload = {
+            'unknownFourByteInt': self.unknownFourByteInt
+        }
+        return self.payload
