@@ -21,6 +21,21 @@ Protocol Information: Check the [Wiki](https://github.com/jpwsutton/instax_api/w
 * Install packages from requirements.txt: `pip install -r requirements.txt --upgrade`.
 * When you are finished, just use `deactivate` to end your session.
 
+## Running the Test Server
+
+The Test server was written to allow developers to simulate an Instax SP-2 printer in order to reverse engineer the incoming messages sent by official client applications e.g. the Android App. It is currently capable of listening for incoming connections and receiving images sent by the app. However it is not yet 100% compatible and will crash the app once the image has been sent.
+
+In order to connect the application, the device running the test server will need to be hosting a WiFi network with an SSID starting with `INSTAX-` followed by a number of hex characters (This would usually be the MAC address of the printer). In my case, I used a Raspberry Pi Model 3 to host the wireless network and run the Test Server on.
+Once you have set up the pi following these instructions: Tutorial link goes here..., you will need to usually run these three commands :
+
+```
+sudo service udhcpd start
+sudo hostapd /etc/hostapd/hostapd.conf (This will keep running so do it in another tab or bg)
+sudo ifconfig wlan0 192.168.0.251
+```
+
+Then run: `python3 testServer.py`
+
 ## Running tests
 Simply run the command: `python3 tests_basic.py -v`
 
