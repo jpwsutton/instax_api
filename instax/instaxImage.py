@@ -70,7 +70,7 @@ class InstaxImage:
         Rotate, Resize and Crop the image, so that it is the correct
         dimensions for printing to the Instax SP-2.
         """
-        maxSize = 800, 600  # The Max Image size
+        maxSize = 600, 800  # The Max Image size
         rotatedImage = rotate_image(self.sourceImage)
         image_ratio = rotatedImage.size[0] / float(rotatedImage.size[1])
 

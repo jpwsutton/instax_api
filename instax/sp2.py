@@ -117,13 +117,12 @@ class SP2:
         response = self.sendCommand(cmdPacket)
         return response
 
-    def sendPrepImageCommand(self, format, options, imgLength, maxLen):
+    def sendPrepImageCommand(self, format, options, imgLength):
         """Send a Prep for Image Command."""
         cmdPacket = PrepImageCommand(Packet.MESSAGE_MODE_COMMAND,
                                      format=format,
                                      options=options,
-                                     imgLength=imgLength,
-                                     maxLen=maxLen)
+                                     imgLength=imgLength)
         response = self.sendCommand(cmdPacket)
         return response
 
