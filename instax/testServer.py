@@ -7,7 +7,7 @@ import socket
 from .packet import Packet, PacketFactory, SpecificationsCommand, \
     VersionCommand, PrintCountCommand, ModelNameCommand, PrePrintCommand, \
     PrinterLockCommand, ResetCommand, PrepImageCommand, SendImageCommand, \
-    Type83Command, Type195Command
+    Type83Command, Type195Command, LockStateCommand
 from .instaxImage import InstaxImage
 import signal
 import sys
@@ -143,8 +143,10 @@ class TestServer:
             response = self.processType83Command(decodedPacket)
         elif(decodedPacket.TYPE == Packet.MESSAGE_TYPE_195):
             response = self.processType195Command(decodedPacket)
+        elif(decodedPacket.TYPE == Packet.MESSAGE_TYPE_SET_LOCK_STATE):
+            response = self.processSetLockStateCommand(decodedPacket)
         else:
-            print('Unknown Command. Failing!')
+            print('Unknown Command. Failing!: ' + str(decodedPacket.TYPE))
 
         decodedResponsePacket = packetFactory.decode(response)
         self.messageLog.append(decodedResponsePacket.getPacketObject())
@@ -295,9 +297,7 @@ class TestServer:
                          args=(imageSegments,)).start()
         return encodedResponse
 
-    def processType195Command(self, decodedPacket):
-        """Process a Type 195 command."""
-        decodedPacket.printDebug()
+    def processType195Command(self, decodedPack
         sessionTime = decodedPacket.header['sessionTime']
         resPacket = Type195Command(Packet.MESSAGE_MODE_RESPONSE)
         encodedResponse = resPacket.encodeResponse(sessionTime,
@@ -306,3 +306,17 @@ class TestServer:
                                                    self.battery,
                                                    self.printCount)
         return encodedResponse
+    
+    def processSetLockStateCommand(self, decodedPacket):
+        """Process a Lock State Command."""
+        unknownFourByteInt = 100
+        sessionTime = decodedPacket.header['sessionTime']
+        resPacket = LockStateCommand(Packet.MESSAGE_MODE_RESPONSE, unknownFourByteInt=unknownFourByteInt)
+        encodedResponse = resPacket.encodeResponse(sessionTime,
+                                                   self.returnCode,
+                                                   self.ejecting,
+                                                   self.battery,
+                                                   self.printCount)
+        return encodedResponse
+    
+        

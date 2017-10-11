@@ -180,7 +180,7 @@ class Packet(object):
     def getPacketObject(self):
         """Return a simple object containing all packet details."""
         packetObj = {}
-        packetObj['bytes'] = self.printRawByteArray(self.byteArray)
+        packetObj['bytes'] = self.printByteArray(self.byteArray)
         packetObj['header'] = self.header
         packetPayload = {}
         for key in self.payload:
