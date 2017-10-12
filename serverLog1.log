@@ -1,0 +1,106 @@
+(env) pi@raspberrypi:~/instax_api $ python3 testServer.py 
+---------- Instax SP-2 Test Server ---------- 
+Server Listening on 0.0.0.0 port 8080
+New Client Connected
+Processing message type: Version
+Processing message type: Model Name
+New Client Connected
+Processing message type: Pre Print
+Processing message type: Pre Print
+Processing message type: Pre Print
+Processing message type: Pre Print
+Processing message type: Pre Print
+Processing message type: Pre Print
+Processing message type: Pre Print
+Processing message type: Pre Print
+New Client Connected
+Processing message type: Model Name
+Processing message type: Version
+Processing message type: Print Count
+Processing message type: Specifications
+New Client Connected
+Processing message type: LockPrinter
+New Client Connected
+Processing message type: Model Name
+New Client Connected
+Processing message type: Print Count
+Processing message type: Specifications
+Processing message type: Reset
+New Client Connected
+Processing message type: PrepImage
+Processing message type: Send Image
+Processing message type: Send Image
+Processing message type: Send Image
+Processing message type: Send Image
+Processing message type: Send Image
+Processing message type: Send Image
+Processing message type: Send Image
+Processing message type: Send Image
+Processing message type: Send Image
+Processing message type: Send Image
+Processing message type: Send Image
+Processing message type: Send Image
+Processing message type: Send Image
+Processing message type: Send Image
+Processing message type: Send Image
+Processing message type: Send Image
+Processing message type: Send Image
+Processing message type: Send Image
+Processing message type: Send Image
+Processing message type: Send Image
+Processing message type: Send Image
+Processing message type: Send Image
+Processing message type: Send Image
+Processing message type: Send Image
+Processing message type: Type 83
+Decoding Image of 24 segments.
+Combined image is 1440000 bytes long
+New Client Connected
+Processing message type: Model Name
+New Client Connected
+Processing message type: Version
+Processing message type: Version
+Processing message type: Lock State
+-------------------------------------------------------------
+Bytes: 24b0 0010 0d08 5993 0457 0000 fdbf 0d0a
+Mode:  Command
+Type:  Lock State
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 176
+    Packet Length: 16
+    Session Time: 218651027
+    Password: 1111
+Payload: None
+-------------------------------------------------------------
+
+New Client Connected
+Processing message type: Type 195
+-------------------------------------------------------------
+Bytes: 24c3 0010 0d08 5993 0457 0000 fdac 0d0a
+Mode:  Command
+Type:  Type 195
+Valid: True
+Header:
+    Start Byte: 36
+    Command: 195
+    Packet Length: 16
+    Session Time: 218651027
+    Password: 1111
+Payload: None
+-------------------------------------------------------------
+
+New Client Connected
+Processing message type: Model Name
+Processing message type: Version
+Processing message type: Print Count
+Processing message type: Specifications
+New Client Connected
+Processing message type: LockPrinter
+Saving Image to:  20171011-202744.bmp
+Saved image to: 20171011-202744.bmp
+^C
+You pressed Ctrl+C! Saving Log and shutting down.
+Saving Log to: instaxServer-20171011-202830.json
+Log file written, have a nice day!
