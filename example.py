@@ -1,4 +1,5 @@
 import instax
+import time
 
 
 def printSeparator():
@@ -7,9 +8,42 @@ def printSeparator():
 
 print("Instax SP-2 Example App")
 myInstax = instax.SP2()
-myInstax.connect(ip='localhost')
-myInstax.connect()
+# host = "localhost"
+host = "192.168.0.251"
+
 printSeparator()
+print("Preparing Image")
+# Initialize The Instax Image
+instaxImage = instax.InstaxImage()
+instaxImage.loadImage("test.jpg")
+instaxImage.convertImage()
+#instaxImage.previewImage()
+instaxImage.saveImage("test.bmp")
+encodedImage = instaxImage.encodeImage()
+printSeparator()
+
+
+myInstax.connect(ip=host)
+
+printSeparator()
+
+# -- Step 1, send version and model name commands.
+printerVersion = myInstax.getPrinterVersion()
+printerVersion.printDebug()
+printerModel = myInstax.getPrinterModelName()
+printerModel.printDebug()
+myInstax.close()
+
+
+# -- Step 2, send pre-print commands.
+myInstax.connect(ip=host)
+for x in range(1, 9):
+    prePrintCmd = myInstax.sendPrePrintCommand(x)
+    print("PrePrint - C: %s, R: %s" % (x, prePrintCmd.respNumber))
+myInstax.close()
+
+# -- Step 3, Model Name, Version, Print Count, Specs Commands
+myInstax.connect(ip=host)
 printerVersion = myInstax.getPrinterVersion()
 printerVersion.printDebug()
 printerModel = myInstax.getPrinterModelName()
@@ -18,52 +52,73 @@ printCount = myInstax.getPrintCount()
 printCount.printDebug()
 printerSpecifications = myInstax.getPrinterSpecifications()
 printerSpecifications.printDebug()
-print("Locking Printer")
+myInstax.close()
+
+# -- Step 4, Lock Printer
+myInstax.connect(ip=host)
 lockPrinter = myInstax.sendLockCommand(1)
 lockPrinter.printDebug()
+myInstax.close()
 
-for x in range(1, 9):
-    prePrintCmd = myInstax.sendPrePrintCommand(x)
-    print("PrePrint - C: %s, R: %s" % (x, prePrintCmd.respNumber))
-printSeparator()
+# -- Step 5, Model name
+myInstax.connect(ip=host)
 
+printerModel = myInstax.getPrinterModelName()
+printerModel.printDebug()
+myInstax.close()
+
+# -- Step 6, Count, Specs, Reset
+myInstax.connect(ip=host)
+
+printCount = myInstax.getPrintCount()
+printCount.printDebug()
+printerSpecifications = myInstax.getPrinterSpecifications()
+printerSpecifications.printDebug()
 sendReset = myInstax.sendResetCommand()
 sendReset.printDebug()
+myInstax.close()
 
+
+# -- Step 7, Prep then Image
+myInstax.connect(ip=host)
 
 prepImage = myInstax.sendPrepImageCommand(16, 0, 1440000)
 prepImage.printDebug()
-
-# Ready to send photo
-
-
-# Initialize The Instax Image
-instaxImage = instax.InstaxImage()
-# Load the image from the filesystem
-instaxImage.loadImage("test.jpg")
-# Convert the image (Will Resize, Rotate and Crop to fix 600x800)
-instaxImage.convertImage()
-# Open the image in the OS image viewer of choice
-instaxImage.previewImage()
-# Save the new image to disk
-instaxImage.saveImage("test.bmp")
-# Get the Byte stream of the image (This is in BITMAP RGB format)
-encodedImage = instaxImage.encodeImage()
-
 for segment in range(24):
     start = segment * 60000
     end = start + 60000
     segmentBytes = encodedImage[start:end]
-    print("Segment: %s, start: %s, end: %s, len: %s" % (segment, start, end, len(segmentBytes)))
-    sendImageCommand = myInstax.sendSendImageCommand(segment, bytes(segmentBytes))
+    print("Segment: %s, start: %s, end: %s, len: %s" % (segment,
+                                                        start,
+                                                        end,
+                                                        len(segmentBytes)))
+    sendImageCommand = myInstax.sendSendImageCommand(segment,
+                                                     bytes(segmentBytes))
     sendImageCommand.printDebug()
 
 type83cmd = myInstax.sendT83Command()
 type83cmd.printDebug()
+myInstax.close()
 
+# -- Step 8, model name
+myInstax.connect(ip=host)
+printerVersion = myInstax.getPrinterVersion()
+printerVersion.printDebug()
+printerModel = myInstax.getPrinterModelName()
+printerModel.printDebug()
+myInstax.close()
 
+# -- Step 9, version, lockstate
+myInstax.connect(ip=host)
+printerVersion = myInstax.getPrinterVersion()
+printerVersion.printDebug()
 lockPrinter = myInstax.sendLockCommand(0)
 lockPrinter.printDebug()
-printSeparator()
 myInstax.close()
-printSeparator()
+
+
+# -- Step 10, 195 command.
+myInstax.connect(ip=host)
+type195cmd = myInstax.sendT195Command()
+type195cmd.printDebug()
+myInstax.close()

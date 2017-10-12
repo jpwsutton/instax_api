@@ -1,7 +1,7 @@
 import socket
-import struct
 import threading
 import queue
+
 
 class ClientCommand:
     """ A command to the client thread.
@@ -17,6 +17,7 @@ class ClientCommand:
     def __init__(self, type, data=None):
         self.type = type
         self.data = data
+
 
 class ClientReply(object):
     """ A reply from the client thread.
@@ -70,12 +71,14 @@ class SocketClientThread(threading.Thread):
         try:
             self.socket = socket.socket(
                 socket.AF_INET, socket.SOCK_STREAM)
+            self.socket.settimeout(5)
             self.socket.connect((cmd.data[0], cmd.data[1]))
             self.reply_q.put(self._success_reply())
         except IOError as e:
             self.reply_q.put(self._error_reply(str(e)))
 
     def _handle_CLOSE(self, cmd):
+        self.socket.shutdown(socket.SHUT_RDWR)
         self.socket.close()
         reply = ClientReply(ClientReply.SUCCESS)
         self.reply_q.put(reply)
@@ -91,10 +94,10 @@ class SocketClientThread(threading.Thread):
         try:
             header_data = self._recv_n_bytes(4)
             if len(header_data) == 4:
-                msg_len = ((header_data[2] &0xFF) << 8 | (header_data[3] &0xFF) << 0)
+                msg_len = ((header_data[2] & 0xFF) << 8 | (header_data[3] & 0xFF) << 0)
                 data = self._recv_n_bytes(msg_len - 4)
                 payload = header_data + data
-                if len(payload) ==  msg_len:
+                if len(payload) == msg_len:
                     self.reply_q.put(self._success_reply(payload))
                     return
             self.reply_q.put(self._error_reply('Socket Closed Prematuerly'))

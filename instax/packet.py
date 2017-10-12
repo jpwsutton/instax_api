@@ -792,6 +792,7 @@ class PrinterLockCommand(Packet):
         payload = bytearray()
         payload = payload + self.encodeOneByteInt(self.lockState)
         payload = payload + self.encodeOneByteInt(0)
+        payload = payload + self.encodeTwoByteInt(0)
         return payload
 
     def decodeComPayload(self, byteArray):
@@ -887,6 +888,9 @@ class PrepImageCommand(Packet):
         payload = payload + self.encodeOneByteInt(self.format)
         payload = payload + self.encodeOneByteInt(self.options)
         payload = payload + self.encodeFourByteInt(self.imgLength)
+        payload = payload + self.encodeTwoByteInt(0)
+        payload = payload + self.encodeTwoByteInt(0)
+        payload = payload + self.encodeTwoByteInt(0)
         return payload
 
     def decodeComPayload(self, byteArray):

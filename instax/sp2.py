@@ -16,8 +16,6 @@ class SP2:
     def __init__(self):
         """Initialise the client."""
         print("Initialising Instax SP-2 class")
-        self.comms = SocketClientThread()
-        self.comms.start()
         self.currentTimeMillis = int(round(time.time() * 1000))
         self.pinCode = 1111
         print('currentTimeMillis %s ' % self.currentTimeMillis)
@@ -26,6 +24,8 @@ class SP2:
     def connect(self, ip='192.168.0.251', port=8080, timeout=10):
         """Connect to a printer."""
         print("Connecting to Instax SP-2 with timeout of: " + str(timeout))
+        self.comms = SocketClientThread()
+        self.comms.start()
         self.comms.cmd_q.put(ClientCommand(ClientCommand.CONNECT, [ip, port]))
         # Get current time
         start = int(time.time())
@@ -69,6 +69,8 @@ class SP2:
         """Send a command packet and returns the response."""
         encodedPacket = commandPacket.encodeCommand(self.currentTimeMillis,
                                                     self.pinCode)
+        decodedCommand = self.packetFactory.decode(encodedPacket)
+        decodedCommand.printDebug()
         reply = self.send_and_recieve(encodedPacket, 5)
         decodedResponse = self.packetFactory.decode(reply.data)
         return decodedResponse
@@ -163,6 +165,8 @@ class SP2:
             try:
                 reply = self.comms.reply_q.get(False)
                 if reply.type == ClientReply.SUCCESS:
+                    self.comms.join()
+                    self.comms = None
                     return
                 else:
                     raise(ConnectError(reply.data))
@@ -170,3 +174,5 @@ class SP2:
                 time.sleep(0.1)
                 pass
         raise(CommandTimedOutException())
+        self.comms.join()
+        self.comms = None

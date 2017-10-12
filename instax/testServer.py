@@ -38,6 +38,7 @@ class TestServer:
         self.finished = False
         self.messageLog = []
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.bind((self.host, self.port))
         signal.signal(signal.SIGINT, self.signal_handler)
         self.imageMap = {}
@@ -74,6 +75,7 @@ class TestServer:
                 buffer = bytearray()
                 length = None
                 break
+        print('Client Disconnected')
 
     def signal_handler(self, signal, frame):
         """Handle Ctrl+C events."""
@@ -297,7 +299,7 @@ class TestServer:
                          args=(imageSegments,)).start()
         return encodedResponse
 
-    def processType195Command(self, decodedPack):
+    def processType195Command(self, decodedPacket):
         sessionTime = decodedPacket.header['sessionTime']
         resPacket = Type195Command(Packet.MESSAGE_MODE_RESPONSE)
         encodedResponse = resPacket.encodeResponse(sessionTime,
