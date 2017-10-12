@@ -297,7 +297,7 @@ class TestServer:
                          args=(imageSegments,)).start()
         return encodedResponse
 
-    def processType195Command(self, decodedPack
+    def processType195Command(self, decodedPack):
         sessionTime = decodedPacket.header['sessionTime']
         resPacket = Type195Command(Packet.MESSAGE_MODE_RESPONSE)
         encodedResponse = resPacket.encodeResponse(sessionTime,
@@ -306,7 +306,7 @@ class TestServer:
                                                    self.battery,
                                                    self.printCount)
         return encodedResponse
-    
+
     def processSetLockStateCommand(self, decodedPacket):
         """Process a Lock State Command."""
         unknownFourByteInt = 100
@@ -318,5 +318,3 @@ class TestServer:
                                                    self.battery,
                                                    self.printCount)
         return encodedResponse
-    
-        
