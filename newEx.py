@@ -1,8 +1,8 @@
 import instax
 import pprint
 print("Instax SP-2 Example App")
-host = "localhost"
-# host = "192.168.0.251"
+# host = "localhost"
+host = "192.168.0.251"
 myInstax = instax.SP2(ip=host)
 
 info = myInstax.getPrinterInformation()
