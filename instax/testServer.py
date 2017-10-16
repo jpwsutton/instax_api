@@ -313,7 +313,8 @@ class TestServer:
         """Process a Lock State Command."""
         unknownFourByteInt = 100
         sessionTime = decodedPacket.header['sessionTime']
-        resPacket = LockStateCommand(Packet.MESSAGE_MODE_RESPONSE, unknownFourByteInt=unknownFourByteInt)
+        resPacket = LockStateCommand(Packet.MESSAGE_MODE_RESPONSE,
+                                     unknownFourByteInt=unknownFourByteInt)
         encodedResponse = resPacket.encodeResponse(sessionTime,
                                                    self.returnCode,
                                                    self.ejecting,

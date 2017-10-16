@@ -6,14 +6,11 @@ An Api for the Fujifilm Instax SP-2 printer written in Python
 
 This is an experimental Python Module to interact and print photos to the Fujifilm Instax SP-2 printer.
 
-Currently there is nothing here yet as I'm still reverse engineering the protocol, so watch this space.
+## Usage
 
-Protocol Information: Check the [Wiki](https://github.com/jpwsutton/instax_api/wiki) for more information about the Instax Protocol.
+Currently, this client is not quite ready for general use, however newEx.py is mostly working and will print out an image. YMMV.
 
-
-
-
-## Using the Virtualenv environment
+## Developing using the Virtualenv environment
 
 * Make sure you have virtualenv installed : `pip install virtualenv`.
 * If you haven't created it yet, create the virtual environment: `virtualenv env -p python3`.

@@ -12,7 +12,7 @@ class ImageTests(unittest.TestCase):
 
     def test_encode_and_decode_image(self):
         """Test Decoding and then Encoding a premade instax image."""
-        encodedImageFile = "testImageDino.instax"
+        encodedImageFile = "testEncodedImage.instax"
         rawInstaxBytes = None
         with open(encodedImageFile, 'rb') as infile:
             rawBytes = infile.read()
