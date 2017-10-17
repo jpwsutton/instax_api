@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+"""Instax SP-2 Print Script.
+
+Author: James Sutton 2017 - jsutton.co.uk
+
+This can be used to print an image to a Fujifilm Instax SP-2 printer.
+Parameters:
+ - Verbose (Default False)
+ - JSON Log File (Default ddmmyy-hhmmss.json)
+ - Image to print
+ - Port (Default 8080)
+ - Host (Default 192.168.0.251)
+
+"""
+import argparse
+import datetime
+import instax
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-v", "--verbose", action="store_true", default=False,
+                    help="Print Verbose log messages to console.")
+parser.add_argument("-l", "--log",
+                    help="The location to store the JSON log,"
+                    "by default: ddmmyy-hhmmss-log.json")
+parser.add_argument("-o", "--host", default='0.0.0.0',
+                    help="The Host IP to connect to the server on.")
+parser.add_argument("-p", "--port", type=int, default=8080,
+                    help="The port to connect to the server on.")
+parser.add_argument("-i", "--pin", type=int, default=1111,
+                    help="The pin code to use, default: 1111.")
+parser.add_argument("-t", "--timeout", type=int, default=10,
+                    help="The timeout to use when communicating.")
+parser.add_argument("image", help="The location of the image to print.")
+args = parser.parse_args()
+
+# If Not specified, set the log file to a datestamp.
+if not args.log:
+    args.log = '{0:%Y-%m-%d.%H:%M:%S-log.json}'.format(datetime.datetime.now())
+
+myInstax = instax.SP2(ip=args.host, port=args.port, pinCode=args.pin,
+                      timeout=args.timeout)
+
+
+info = myInstax.getPrinterInformation()
+
+
+print("Preparing Image")
+# Initialize The Instax Image
+instaxImage = instax.InstaxImage()
+instaxImage.loadImage(args.image)
+instaxImage.convertImage()
+# instaxImage.saveImage("test.bmp")
+# instaxImage.previewImage()
+encodedImage = instaxImage.encodeImage()
+
+print = myInstax.printPhoto(encodedImage)

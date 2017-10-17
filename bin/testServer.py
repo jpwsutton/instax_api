@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Instax SP-2 Test Server Wrapper.
 
 Author: James Sutton 2017 - jsutton.co.uk
