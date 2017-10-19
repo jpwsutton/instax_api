@@ -74,10 +74,13 @@ class InstaxImage:
         rotatedImage = rotate_image(self.sourceImage)
         image_ratio = rotatedImage.size[0] / float(rotatedImage.size[1])
 
-        if image_ratio == 1.0:
-            img = crop_square(rotatedImage, maxSize, backgroundColour)
+        if(rotatedImage.size[0] + rotatedImage.size[1] == 1400):
+            img = rotatedImage
         else:
-            img = crop_rectangle(rotatedImage, maxSize, crop_type)
+            if image_ratio == 1.0:
+                img = crop_square(rotatedImage, maxSize, backgroundColour)
+            else:
+                img = crop_rectangle(rotatedImage, maxSize, crop_type)
 
         # Stip away any exif data.
         newImage = Image.new(img.mode, img.size)
@@ -110,9 +113,11 @@ def rotate_image(source):
     """
     exif_orientation = 274
     img_ratio = source.size[0] / float(source.size[1])
+    if(source._getexif() is None):
+        return source
+    exif_data = dict(source._getexif().items())
     if img_ratio > 1:
         # Image is landscape
-        exif_data = dict(source._getexif().items())
         if exif_orientation in exif_data:
             orientation = exif_data[exif_orientation]
             if orientation == 1:
@@ -142,7 +147,6 @@ def rotate_image(source):
             # No Orientation Exif data, As it's landscape, just rotate 270
             tmpImage = source.rotate(270, expand=True)
     else:
-        exif_data = dict(source._getexif().items())
         if exif_orientation in exif_data:
             orientation = exif_data[exif_orientation]
             if orientation == 1:

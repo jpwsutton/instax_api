@@ -22,7 +22,7 @@ parser.add_argument("-v", "--verbose", action="store_true", default=False,
 parser.add_argument("-l", "--log",
                     help="The location to store the JSON log,"
                     "by default: ddmmyy-hhmmss-log.json")
-parser.add_argument("-o", "--host", default='0.0.0.0',
+parser.add_argument("-o", "--host", default='192.168.0.251',
                     help="The Host IP to connect to the server on.")
 parser.add_argument("-p", "--port", type=int, default=8080,
                     help="The port to connect to the server on.")
@@ -44,7 +44,7 @@ myInstax = instax.SP2(ip=args.host, port=args.port, pinCode=args.pin,
 info = myInstax.getPrinterInformation()
 
 
-print("Preparing Image")
+print("Printing Image: %s" % args.image)
 # Initialize The Instax Image
 instaxImage = instax.InstaxImage()
 instaxImage.loadImage(args.image)

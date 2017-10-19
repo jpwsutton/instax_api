@@ -8,8 +8,10 @@ This is an experimental Python Module to interact and print photos to the Fujifi
 
 ## Install this library
 
+In order to use this library, you will need to be using Python 3
+
 ```
-pip install instax-api
+pip3 install instax-api
 ```
 
 ## Usage
@@ -42,5 +44,5 @@ optional arguments:
 ```
 git clone https://github.com/jpwsutton/instax_api.git
 cd instax_api
-python setup.py install
+python3 setup.py install
 ```
