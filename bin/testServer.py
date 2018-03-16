@@ -18,7 +18,15 @@ Parameters:
 """
 import argparse
 import datetime
-import instax
+try:
+    import instax
+except:
+    # We are most likely in development mode, import from parent.
+    import sys
+    import os
+    sys.path.append(os.path.abspath('..'))
+    import instax
+
 
 print("---------- Instax SP-2 Test Server ---------- ")
 

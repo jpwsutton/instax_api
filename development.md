@@ -3,10 +3,10 @@
 
 ## Developing using the Virtualenv environment
 
-* Make sure you have virtualenv installed : `pip install virtualenv`.
+* Make sure you have virtualenv installed : `pip3 install virtualenv`.
 * If you haven't created it yet, create the virtual environment: `virtualenv env -p python3`.
 * Activate the environment: `source env/bin/activate`.
-* Install packages from requirements.txt: `pip install -r requirements.txt --upgrade`.
+* Install packages from requirements.txt: `pip3 install -r requirements.txt --upgrade`.
 * When you are finished, just use `deactivate` to end your session.
 
 ## Running the Test Server
