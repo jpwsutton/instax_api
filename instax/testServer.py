@@ -31,6 +31,7 @@ class TestServer:
         self.backlog = 5
         self.returnCode = Packet.RTN_E_RCV_FRAME
         self.ejecting = 0
+        self.printingState = 0
         self.battery = battery
         self.printCount = total
         self.remaining = remaining
@@ -301,9 +302,15 @@ class TestServer:
 
     def processType195Command(self, decodedPacket):
         sessionTime = decodedPacket.header['sessionTime']
+        returnCode = Packet.RTN_E_PRINTING
+        if self.printingState == 100:
+            returnCode = Packet.RTN_E_RCV_FRAME
+            self.printingState = 0
+        else:
+            self.printingState += 25
         resPacket = Type195Command(Packet.MESSAGE_MODE_RESPONSE)
         encodedResponse = resPacket.encodeResponse(sessionTime,
-                                                   self.returnCode,
+                                                   returnCode,
                                                    self.ejecting,
                                                    self.battery,
                                                    self.printCount)
