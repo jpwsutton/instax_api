@@ -8,6 +8,14 @@ class InstaxImage:
     printHeight = 600
     printWidth = 800
 
+    def __init__(self, verbose=False):
+        """Initialise the instax Image."""
+        self.verbose = verbose
+
+    def logMessage(self, message):
+        if self.verbose:
+            print(message)
+
     def loadImage(self, imagePath):
         """Load an image from a path."""
         self.sourceImage = Image.open(imagePath)
@@ -15,18 +23,18 @@ class InstaxImage:
     def encodeImage(self):
         """Encode the loaded Image."""
         imgWidth, imgHeight = self.myImage.size
-        print("Initial Image Size: W: %s, H: %s" % (imgWidth, imgHeight))
+        self.logMessage("Initial Image Size: W: %s, H: %s" % (imgWidth, imgHeight))
         # Quick check that it's the right dimensions
         if(imgWidth + imgHeight != 1400):
             raise Exception("Image was not 800x600 or 600x800")
         if(imgWidth != 800):
             # Rotate the image
-            print("Rotating")
+            self.logMessage("Rotating")
             self.myImage = self.myImage.rotate(-90, expand=True)
-        print("New Image Size: W: %s, H: %s" % (self.myImage.size))
+        self.logMessage("New Image Size: W: %s, H: %s" % (self.myImage.size))
         imagePixels = self.myImage.getdata()
         arrayLen = len(imagePixels) * 3
-        print("Encoded Array Length: %s" % arrayLen)
+        self.logMessage("Encoded Array Length: %s" % arrayLen)
         encodedBytes = [None] * arrayLen
         for h in range(self.printHeight):
             for w in range(self.printWidth):
@@ -93,7 +101,7 @@ class InstaxImage:
 
     def saveImage(self, filename):
         """Save the image to the specified path."""
-        print("Saving Image to: ", filename)
+        self.logMessage(("Saving Image to: ", filename))
         self.myImage.save(filename, 'BMP', quality=100, optimise=True)
 
     def getBytes(self):

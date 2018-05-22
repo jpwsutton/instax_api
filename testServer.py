@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Instax SP-2 Test Server Wrapper.
 
 Author: James Sutton 2017 - jsutton.co.uk
@@ -18,14 +18,7 @@ Parameters:
 """
 import argparse
 import datetime
-try:
-    import instax
-except:
-    # We are most likely in development mode, import from parent.
-    import sys
-    import os
-    sys.path.append(os.path.abspath('..'))
-    import instax
+import instax
 
 
 print("---------- Instax SP-2 Test Server ---------- ")

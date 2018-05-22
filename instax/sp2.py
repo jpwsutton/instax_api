@@ -3,6 +3,7 @@
 from .comms import SocketClientThread, ClientCommand, ClientReply
 import time
 import queue
+import sys
 from .exceptions import CommandTimedOutException, ConnectError
 from .packet import PacketFactory, Packet, SpecificationsCommand,  \
     VersionCommand, PrintCountCommand, ModelNameCommand, PrePrintCommand, \
@@ -10,24 +11,35 @@ from .packet import PacketFactory, Packet, SpecificationsCommand,  \
     Type83Command, Type195Command, LockStateCommand
 
 
+#https://gist.github.com/vladignatyev/06860ec2040cb497f0f3
+def progress(count, total, status=''):
+    bar_len = 60
+    filled_len = int(round(bar_len * count / float(total)))
+
+    percents = round(100.0 * count / float(total), 1)
+    bar = '=' * filled_len + '-' * (bar_len - filled_len)
+
+    sys.stdout.write('[%s] %s%s ...%s\r' % (bar, percents, '%', status))
+    sys.stdout.flush()  # As suggested by Rom Ruben (see: http://stackoverflow.com/questions/3173320/text-progress-bar-in-the-console/27871113#comment50529068_27871113)
+
 class SP2:
     """SP2 Client interface."""
 
     def __init__(self, ip='192.168.0.251', port=8080,
-                 timeout=10, pinCode=1111):
+                 timeout=10, pinCode=1111, verbose=False):
         """Initialise the client."""
-        print("Initialising Instax SP-2 client")
         self.currentTimeMillis = int(round(time.time() * 1000))
         self.ip = ip
         self.port = port
         self.timeout = 10
         self.pinCode = pinCode
-        print('currentTimeMillis %s ' % self.currentTimeMillis)
+        self.verbose = verbose
         self.packetFactory = PacketFactory()
 
     def connect(self):
         """Connect to a printer."""
-        print("Connecting to Instax SP-2 with timeout of: %s" % self.timeout)
+        if self.verbose:
+            print("Connecting to Instax SP-2 with timeout of: %s" % self.timeout)
         self.comms = SocketClientThread()
         self.comms.start()
         self.comms.cmd_q.put(ClientCommand(ClientCommand.CONNECT,
@@ -75,9 +87,12 @@ class SP2:
         encodedPacket = commandPacket.encodeCommand(self.currentTimeMillis,
                                                     self.pinCode)
         decodedCommand = self.packetFactory.decode(encodedPacket)
-        decodedCommand.printDebug()
+        if self.verbose:
+            decodedCommand.printDebug()
         reply = self.send_and_recieve(encodedPacket, 5)
         decodedResponse = self.packetFactory.decode(reply.data)
+        if self.verbose:
+            decodedResponse.printDebug()
         return decodedResponse
 
     def getPrinterVersion(self):
@@ -161,7 +176,8 @@ class SP2:
 
     def close(self, timeout=10):
         """Close the connection to the Printer."""
-        print("Closing connection to Instax SP2")
+        if self.verbose:
+            print("Closing connection to Instax SP2")
         self.comms.cmd_q.put(ClientCommand(ClientCommand.CLOSE))
         # Get current time
         start = int(time.time())
@@ -191,6 +207,8 @@ class SP2:
         printerInformation = {
             'version': printerVersion.payload,
             'model': printerModel.payload['modelName'],
+            'battery': printerVersion.header['battery'],
+            'printCount': printerVersion.header['printCount'],
             'specs': printerSpecifications.payload,
             'count': printCount.payload['printHistory']
         }
@@ -199,60 +217,61 @@ class SP2:
 
     def printPhoto(self, imageBytes):
         """Print a Photo to the Printer."""
+        progressTotal = 100
+        progress(0 , progressTotal, status='Connecting to instax Printer.           ')
         # Send Pre Print Commands
         self.connect()
+        progress(10, progressTotal, status='Connected! - Sending Pre Print Commands.')
         for x in range(1, 9):
-            prePrintCmd = self.sendPrePrintCommand(x)
-            print("PrePrint - C: %s, R: %s" % (x, prePrintCmd.respNumber))
+            self.sendPrePrintCommand(x)
         self.close()
 
         # Lock The Printer
         time.sleep(1)
         self.connect()
+        progress(20, progressTotal, status='Locking Printer for Print.               ')
         self.sendLockCommand(1)
         self.close()
 
         # Reset the Printer
         time.sleep(1)
         self.connect()
+        progress(30, progressTotal, status='Reseting Printer.                         ')
         self.sendResetCommand()
         self.close()
 
         # Send the Image
         time.sleep(1)
         self.connect()
+        progress(40, progressTotal, status='About to send Image.                       ')
         self.sendPrepImageCommand(16, 0, 1440000)
         for segment in range(24):
             start = segment * 60000
             end = start + 60000
             segmentBytes = imageBytes[start:end]
             self.sendSendImageCommand(segment, bytes(segmentBytes))
+            progress(40 + segment, progressTotal, status=('Sent image segment %s.         ' % segment))
         self.sendT83Command()
         self.close()
-
+        progress(70, progressTotal, status='Image Print Started.                       ')
         # Send Print State Req
         time.sleep(1)
         self.connect()
-        printStateCmd = self.sendLockStateCommand()
-        if(printStateCmd.header['returnCode'] in [Packet.RTN_E_PRINTING,
-                                                  Packet.RTN_E_EJECTING]):
-            # Print has started, poll for status
-            printComplete = self.checkPrintStatus(30)
-            print("Print Complete: %s" % printComplete)
+        self.sendLockStateCommand()
+        self.getPrinterVersion()
+        self.getPrinterModelName()
+        progress(90, progressTotal, status='Checking status of print.                    ')
+        printStatus = self.checkPrintStatus(30)
+        if printStatus is True:
+            progress(100, progressTotal, status='Print is complete!                       \n')
         else:
-            print("Doesn't seem to be printing...")
-
-        # Check the status of the print
-        time.sleep(1)
-        self.connect()
-        t195Cmd = self.sendT195Command()
-        t195Cmd.printDebug()
+            progress(100, progressTotal, status='Timed out waiting for print..            \n')
         self.close()
 
     def checkPrintStatus(self, timeout=30):
         """Check the status of a print."""
-        for x in range(timeout):
-            printStateCmd = self.sendLockStateCommand()
+        for _ in range(timeout):
+            printStateCmd = self.sendT195Command()
             if printStateCmd.header['returnCode'] is Packet.RTN_E_RCV_FRAME:
                 return True
             else:
