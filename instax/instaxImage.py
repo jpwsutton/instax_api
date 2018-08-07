@@ -5,16 +5,22 @@ from PIL import Image, ImageOps
 class InstaxImage:
     """Image Utilities class."""
 
-    printHeight = 600
-    printWidth = 800
+    dimensions = {
+        1 : (600, 800),
+        2 : (600, 800),
+        3 : (800, 800)
+    }
 
-    def __init__(self, verbose=False):
+
+    def __init__(self, logCallback, type=2):
         """Initialise the instax Image."""
-        self.verbose = verbose
+        self.logCallback = logCallback
+        self.type = type
+        self.printHeight, self.printWidth = self.dimensions[self.type]
 
     def logMessage(self, message):
-        if self.verbose:
-            print(message)
+        if self.logCallback:
+            self.logCallback(message, False, True)
 
     def loadImage(self, imagePath):
         """Load an image from a path."""

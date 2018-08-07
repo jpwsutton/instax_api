@@ -21,54 +21,101 @@ except:
     # We are most likely in development mode, import from parent.
     from .. import instax
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-v", "--verbose", action="store_true", default=False,
-                    help="Print Verbose log messages to console.")
-parser.add_argument("-l", "--log", action="store_true", default=False,
-                    help="The location to store the JSON log,"
-                    "by default: ddmmyy-hhmmss-log.json")
-parser.add_argument("-o", "--host", default='192.168.0.251',
-                    help="The Host IP to connect to the server on.")
-parser.add_argument("-p", "--port", type=int, default=8080,
-                    help="The port to connect to the server on.")
-parser.add_argument("-i", "--pin", type=int, default=1111,
-                    help="The pin code to use, default: 1111.")
-parser.add_argument("-t", "--timeout", type=int, default=10,
-                    help="The timeout to use when communicating.")
-parser.add_argument("image", help="The location of the image to print.")
-args = parser.parse_args()
+quiet_mode = False
 
-# If Not specified, set the log file to a datestamp.
-if args.log:
-    args.log = '{0:%Y-%m-%d.%H:%M:%S-log.json}'.format(datetime.datetime.now())
+def logToConsole(message, error=False, verbose=False):
+    """Log a message to the console"""
+    if (error is True) or (quiet_mode is False) or (verbose is True):
+        if message is None:
+            print()
+        else:
+            print(message)
 
-myInstax = instax.SP2(ip=args.host, port=args.port, pinCode=args.pin,
+def printPrinterInfo(info):
+    """ Log Printer information"""
+    logToConsole("Model: %s" % info['model'])
+    logToConsole("Firmware: %s" % info['version']['firmware'])
+    logToConsole("Battery State: %s" % info['battery'])
+    logToConsole("Prints Remaining: %d" % info['printCount'])
+    logToConsole("Total Lifetime Prints: %d" % info['count'])
+    logToConsole("")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-V", "--version", action="store_true", default=False,
+                        help="Prints the current version.")
+    parser.add_argument("-v", "--verbose", action="store_true", default=False,
+                        help="Print Verbose log messages to console.")
+    
+    parser.add_argument("-l", "--log", action="store_true", default=False,
+                        help="Save debug data to a log file,"
+                        "by default: ddmmyy-hhmmss-log.json")
+    parser.add_argument("-o", "--host", default='192.168.0.251',
+                        help="The Host IP to connect to the server on.")
+    parser.add_argument("-p", "--port", type=int, default=8080,
+                        help="The port to connect to the server on.")
+    parser.add_argument("-i", "--pin", type=int, default=1111,
+                        help="The pin code to use, default: 1111.")
+    parser.add_argument("-t", "--timeout", type=int, default=10,
+                        help="The timeout to use when communicating.")
+    parser.add_argument("-q", "--quiet", action="store_true", default=False,
+                        help="Runs in quiet mode and will only output errors if they occur.")
+    parser.add_argument("-S", "--instaxversion", type=int, default=2,
+                        help="The version of Instax Printer to use (1, 2 or 3). Default is 2.")
+    parser.add_argument("image", help="The location of the image to print.")
+    args = parser.parse_args()
+
+    # Show version
+    if args.version:
+        print("Instax Print - Version: %s" % instax.version)
+        exit(0)
+
+    if args.quiet:
+        quiet_mode = True
+
+    # If Not specified, set the log file to a datestamp.
+    if args.log:
+        args.log = '{0:%Y-%m-%d.%H:%M:%S-log.json}'.format(datetime.datetime.now())
+
+    logToConsole("--- Instax Printer Python Client ---")
+    logToConsole("")
+    myInstax = None
+
+    if args.instaxversion is 1:
+        logToConsole("Attempting to print to an Instax SP-1 printer.")
+        # TODO
+    elif args.instaxversion is 2:
+        logToConsole("Attempting to print to an Instax SP-2 printer.")
+        myInstax = instax.SP2(ip=args.host, port=args.port, pinCode=args.pin,
                       timeout=args.timeout, verbose=args.verbose)
+    elif args.instaxversion is 3:
+        logToConsole("Attempting to print to an Instax SP-3 printer.")
+        # TODO
+    else:
+        logToConsole("Invalid Instax printer version given", True)
+        exit(1)
 
-print("--- Instax SP-2 Printer Python Client ---")
-print()
-print("Connecting to Printer.")
-info = myInstax.getPrinterInformation()
-print("Model: %s" % info['model'])
-print("Firmware: %s" % info['version']['firmware'])
-print("Battery State: %s" % info['battery'])
-print("Prints Remaining: %d" % info['printCount'])
-print("Total Lifetime Prints: %d" % info['count'])
-print()
+    # Attempt print
+    logToConsole("Connecting to Printer.")
+    info = myInstax.getPrinterInformation()
+    printPrinterInfo(info)
 
-print("Printing Image: %s" % args.image)
-# Initialize The Instax Image
-instaxImage = instax.InstaxImage(verbose=args.verbose)
-instaxImage.loadImage(args.image)
-instaxImage.convertImage()
-# Save a copy of the converted bitmap
-# instaxImage.saveImage("test.bmp")
-# instaxImage.previewImage()
-encodedImage = instaxImage.encodeImage()
-myInstax.printPhoto(encodedImage)
-print("Thank you for using instax-print!")
-print(r"""
-      \    /\
-       )  ( ')
-      (  /  )
-       \(__)|""")
+    logToConsole("Printing Image: %s" % args.image)
+    # Initialize The Instax Image
+    instaxImage = instax.InstaxImage(logCallback=logToConsole, type=args.instaxversion)
+    instaxImage.loadImage(args.image)
+    instaxImage.convertImage()
+    # Save a copy of the converted bitmap
+    # instaxImage.saveImage("test.bmp")
+    # instaxImage.previewImage()
+    encodedImage = instaxImage.encodeImage()
+    myInstax.printPhoto(encodedImage)
+    logToConsole("Thank you for using instax-print!")
+    logToConsole(r"""
+        \   /\
+        )  ( ')
+        (  /  )
+        \(__)|""")
+
+

@@ -6,3 +6,6 @@ from .packet import PacketFactory, Packet, SpecificationsCommand, \
                     ModelNameCommand, PrinterLockCommand, SendImageCommand, \
                     ResetCommand, PrepImageCommand, Type83Command, \
                     Type195Command, LockStateCommand
+
+
+version = "0.4"
