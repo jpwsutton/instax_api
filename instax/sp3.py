@@ -1,24 +1,23 @@
-"""Main SP2 Interface Class."""
+"""Main SP3 Interface Class."""
 
 from .comms import SocketClientThread, ClientCommand, ClientReply
 import time
 import queue
 import sys
-import logging
 from .exceptions import CommandTimedOutException, ConnectError
 from .packet import PacketFactory, Packet, SpecificationsCommand,  \
     VersionCommand, PrintCountCommand, ModelNameCommand, PrePrintCommand, \
     PrinterLockCommand, ResetCommand, PrepImageCommand, SendImageCommand, \
     Type83Command, Type195Command, LockStateCommand
+import logging
 
 
-class SP2:
-    """SP2 Client interface."""
+class SP3:
+    """SP3 Client interface."""
 
     def __init__(self, ip='192.168.0.251', port=8080,
                  timeout=10, pinCode=1111):
         """Initialise the client."""
-        logging.debug("Initialising Instax SP-2 Class")
         self.currentTimeMillis = int(round(time.time() * 1000))
         self.ip = ip
         self.port = port
@@ -28,7 +27,7 @@ class SP2:
 
     def connect(self):
         """Connect to a printer."""
-        logging.debug("Connecting to Instax SP-2 with timeout of: %s" % self.timeout)
+        logging.info("Connecting to Instax SP-2 with timeout of: %s" % self.timeout)
         self.comms = SocketClientThread()
         self.comms.start()
         self.comms.cmd_q.put(ClientCommand(ClientCommand.CONNECT,
@@ -163,7 +162,7 @@ class SP2:
 
     def close(self, timeout=10):
         """Close the connection to the Printer."""
-        logging.debug("Closing connection to Instax SP2")
+        logging.info("Closing connection to Instax SP3")
         self.comms.cmd_q.put(ClientCommand(ClientCommand.CLOSE))
         # Get current time
         start = int(time.time())
@@ -210,36 +209,37 @@ class SP2:
         self.connect()
         progress(10, progressTotal, status='Connected! - Sending Pre Print Commands.')
         for x in range(1, 9):
-            self.sendPrePrintCommand(x)
+            resp = self.sendPrePrintCommand(x)
         self.close()
-
         # Lock The Printer
         time.sleep(1)
         self.connect()
         progress(20, progressTotal, status='Locking Printer for Print.               ')
-        self.sendLockCommand(1)
+        resp = self.sendLockCommand(1)
         self.close()
 
         # Reset the Printer
         time.sleep(1)
         self.connect()
         progress(30, progressTotal, status='Reseting Printer.                         ')
-        self.sendResetCommand()
+        resp = self.sendResetCommand()
         self.close()
 
         # Send the Image
         time.sleep(1)
         self.connect()
         progress(40, progressTotal, status='About to send Image.                       ')
-        self.sendPrepImageCommand(16, 0, 1440000)
+        resp = self.sendPrepImageCommand(16, 0, 1920000)
         for segment in range(24):
             start = segment * 60000
             end = start + 60000
             segmentBytes = imageBytes[start:end]
-            self.sendSendImageCommand(segment, bytes(segmentBytes))
+            resp = self.sendSendImageCommand(segment, bytes(segmentBytes))
             progress(40 + segment, progressTotal, status=('Sent image segment %s.         ' % segment))
-        self.sendT83Command()
+        resp = self.sendT83Command()
+        resp.printDebug()
         self.close()
+        exit()
         progress(70, progressTotal, status='Image Print Started.                       ')
         # Send Print State Req
         time.sleep(1)

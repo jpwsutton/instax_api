@@ -1,4 +1,5 @@
 from .sp2 import SP2
+from .sp3 import SP3
 from .testServer import TestServer
 from .instaxImage import InstaxImage
 from .packet import PacketFactory, Packet, SpecificationsCommand, \

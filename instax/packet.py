@@ -4,7 +4,7 @@ This packet library can be used to encode and decode packets to be sent to
 or recieved from a Fujifilm Instax SP-2. It is designed to be used with the
 instax_api Python Library.
 """
-
+import logging
 
 class PacketFactory(object):
     """Packet Factory.
@@ -72,8 +72,8 @@ class PacketFactory(object):
         elif pType == self.MESSAGE_TYPE_SET_LOCK_STATE:
             return(LockStateCommand(mode=self.mode, byteArray=byteArray))
         else:
-            print("Unknown Packet Type: " + str(pType))
-            print("Packet Bytes: [" + self.printRawByteArray(byteArray) + "]")
+            logging.debug("Unknown Packet Type: " + str(pType))
+            logging.debug("Packet Bytes: [" + self.printRawByteArray(byteArray) + "]")
 
 
 class Packet(object):
@@ -144,38 +144,37 @@ class Packet(object):
 
     def printDebug(self):
         """Print Debug information about packet."""
-        print("-------------------------------------------------------------")
-        print("Bytes: %s" % (self.printByteArray(self.byteArray)))
-        print("Mode:  %s" % (self.strings[self.mode]))
-        print("Type:  %s" % (self.NAME))
-        print("Valid: %s" % (self.valid))
-        print("Header:")
-        print("    Start Byte: %s" % (self.header['startByte']))
-        print("    Command: %s" % (self.header['cmdByte']))
-        print("    Packet Length: %s" % (self.header['packetLength']))
-        print("    Session Time: %s" % (self.header['sessionTime']))
+        logging.debug("--------------------- Packet Debug Data --------------------")
+        logging.debug("Bytes: %s" % (self.printByteArray(self.byteArray)))
+        logging.debug("Mode:  %s" % (self.strings[self.mode]))
+        logging.debug("Type:  %s" % (self.NAME))
+        logging.debug("Valid: %s" % (self.valid))
+        logging.debug("Header:")
+        logging.debug("    Start Byte: %s" % (self.header['startByte']))
+        logging.debug("    Command: %s" % (self.header['cmdByte']))
+        logging.debug("    Packet Length: %s" % (self.header['packetLength']))
+        logging.debug("    Session Time: %s" % (self.header['sessionTime']))
         if(self.mode == self.MESSAGE_MODE_COMMAND):
-            print("    Password: %s" % (self.header['password']))
+            logging.debug("    Password: %s" % (self.header['password']))
         elif(self.mode == self.MESSAGE_MODE_RESPONSE):
-            print("    Return Code: %s" % (self.header['returnCode']))
-            print("    Unknown 1: %s" % (self.header['unknown1']))
-            print("    Ejecting: %s" % (self.header['ejecting']))
-            print("    Battery: %s" % (self.header['battery']))
-            print("    Prints Left: %s" % (self.header['printCount']))
+            logging.debug("    Return Code: %s" % (self.header['returnCode']))
+            logging.debug("    Unknown 1: %s" % (self.header['unknown1']))
+            logging.debug("    Ejecting: %s" % (self.header['ejecting']))
+            logging.debug("    Battery: %s" % (self.header['battery']))
+            logging.debug("    Prints Left: %s" % (self.header['printCount']))
 
         if len(self.payload) == 0:
-            print("Payload: None")
+            logging.debug("Payload: None")
         else:
-            print("Payload:")
+            logging.debug("Payload:")
             for key in self.payload:
                 if(key == 'payloadBytes'):
-                    print("    payloadBytes: (length: %s) : [%s]" %
+                    logging.debug("    payloadBytes: (length: %s) : [%s]" %
                           (str(len(self.payload[key])),
                            self.printByteArray(self.payload[key])))
                 else:
-                    print("    %s : %s" % (key, self.payload[key]))
-        print("-------------------------------------------------------------")
-        print()
+                    logging.debug("    %s : %s" % (key, self.payload[key]))
+        logging.debug("------------------------------------------------------------")
 
     def getPacketObject(self):
         """Return a simple object containing all packet details."""
@@ -244,12 +243,12 @@ class Packet(object):
             else:
                 return False
         except Exception as ex:
-            print("Unexpected Error validating packet: " + str(type(ex)))
-            print(ex.args)
-            print(ex)
-            print("Expected:      %s" % (packetLength))
-            print("Actual:        %s" % (str(len(byteArray))))
-            print("Final 4 bytes: %s" % (self.printByteArray(byteArray[-4:])))
+            logging.debug("Unexpected Error validating packet: " + str(type(ex)))
+            logging.debug(ex.args)
+            logging.debug(ex)
+            logging.debug("Expected:      %s" % (packetLength))
+            logging.debug("Actual:        %s" % (str(len(byteArray))))
+            logging.debug("Final 4 bytes: %s" % (self.printByteArray(byteArray[-4:])))
 
     def generateCommand(self, mode, cmdType, sessionTime, payload, pinCode):
         """Generate a command.

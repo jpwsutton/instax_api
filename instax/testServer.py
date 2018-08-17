@@ -14,18 +14,17 @@ import sys
 import time
 import json
 import threading
+import logging
 
 
 class TestServer:
     """A Test Server for the Instax Library."""
 
-    def __init__(self, verbose=False, log=None, host='0.0.0.0', port=8080,
+    def __init__(self, host='0.0.0.0', port=8080,
                  dest="images", battery=2, remaining=10, total=20):
         """Initialise Server."""
         self.packetFactory = PacketFactory()
         self.host = host
-        self.verbose = verbose
-        self.log = log
         self.dest = dest
         self.port = port
         self.backlog = 5
@@ -43,11 +42,12 @@ class TestServer:
         self.socket.bind((self.host, self.port))
         signal.signal(signal.SIGINT, self.signal_handler)
         self.imageMap = {}
+        self.logger = logging.getLogger('instax_server')
 
     def start(self):
         """Start the Server."""
         self.socket.listen(self.backlog)
-        print(('Server Listening on %s port %s' % (self.host, self.port)))
+        self.logger.info(('Server Listening on %s port %s' % (self.host, self.port)))
         while True:
             client, address = self.socket.accept()
             client.settimeout(60)
@@ -56,7 +56,7 @@ class TestServer:
 
     def listenToClient(self, client, address):
         """Interact with client."""
-        print('New Client Connected')
+        self.logger.info('New Client Connected')
         length = None
         buffer = bytearray()
         while True:
@@ -76,33 +76,33 @@ class TestServer:
                 buffer = bytearray()
                 length = None
                 break
-        print('Client Disconnected')
+        self.logger.info('Client Disconnected')
 
     def signal_handler(self, signal, frame):
         """Handle Ctrl+C events."""
-        print()
         print('You pressed Ctrl+C! Saving Log and shutting down.')
+        self.logger.info("Shutting down Server")
         timestr = time.strftime("%Y%m%d-%H%M%S")
         filename = "instaxServer-" + timestr + ".json"
-        print("Saving Log to: %s" % filename)
+        self.logger.info("Saving Log to: %s" % filename)
         with open(filename, 'w') as outfile:
             json.dump(self.messageLog, outfile, indent=4)
-        print("Log file written, have a nice day!")
+        self.logger.info("Log file written, have a nice day!")
         sys.exit(0)
 
     def decodeImage(self, segments):
         """Decode an encoded image."""
-        print("Decoding Image of %s segments." % len(segments))
+        self.logger.info("Decoding Image of %s segments." % len(segments))
         combined = bytearray()
         for seg_key in range(len(segments)):
             combined += segments[seg_key]
-        print("Combined image is %s bytes long" % len(combined))
+        self.logger.info("Combined image is %s bytes long" % len(combined))
         instaxImage = InstaxImage()
         instaxImage.decodeImage(combined)
         timestr = time.strftime("%Y%m%d-%H%M%S")
         filename = timestr + ".bmp"
         instaxImage.saveImage(filename)
-        print("Saved image to: %s" % filename)
+        self.logger.info("Saved image to: %s" % filename)
 
     def printByteArray(self, byteArray):
         """Print a Byte Array.
@@ -121,7 +121,7 @@ class TestServer:
         decodedPacket = packetFactory.decode(payload)
         decodedPacketObj = decodedPacket.getPacketObject()
         self.messageLog.append(decodedPacketObj)
-        print("Processing message type: %s" % decodedPacket.NAME)
+        self.logger.info("Processing message type: %s" % decodedPacket.NAME)
         response = None
 
         if(decodedPacket.TYPE == Packet.MESSAGE_TYPE_PRINTER_VERSION):
@@ -149,7 +149,7 @@ class TestServer:
         elif(decodedPacket.TYPE == Packet.MESSAGE_TYPE_SET_LOCK_STATE):
             response = self.processSetLockStateCommand(decodedPacket)
         else:
-            print('Unknown Command. Failing!: ' + str(decodedPacket.TYPE))
+            self.logger.info('Unknown Command. Failing!: ' + str(decodedPacket.TYPE))
 
         decodedResponsePacket = packetFactory.decode(response)
         self.messageLog.append(decodedResponsePacket.getPacketObject())
@@ -221,7 +221,7 @@ class TestServer:
         elif(cmdNumber in [1, 2, 3]):
             respNumber = 2
         else:
-            print("Unknown cmdNumber")
+            self.logger.warning("Unknown cmdNumber")
             respNumber = 0
         sessionTime = decodedPacket.header['sessionTime']
         resPacket = PrePrintCommand(Packet.MESSAGE_MODE_RESPONSE,

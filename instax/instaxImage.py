@@ -1,5 +1,6 @@
 """Image transformation utilities."""
 from PIL import Image, ImageOps
+import logging
 
 
 class InstaxImage:
@@ -12,15 +13,10 @@ class InstaxImage:
     }
 
 
-    def __init__(self, logCallback, type=2):
+    def __init__(self, type=2):
         """Initialise the instax Image."""
-        self.logCallback = logCallback
         self.type = type
         self.printHeight, self.printWidth = self.dimensions[self.type]
-
-    def logMessage(self, message):
-        if self.logCallback:
-            self.logCallback(message, False, True)
 
     def loadImage(self, imagePath):
         """Load an image from a path."""
@@ -29,22 +25,23 @@ class InstaxImage:
     def encodeImage(self):
         """Encode the loaded Image."""
         imgWidth, imgHeight = self.myImage.size
-        self.logMessage("Initial Image Size: W: %s, H: %s" % (imgWidth, imgHeight))
+        logging.info("Initial Image Size: W: %s, H: %s" % (imgWidth, imgHeight))
         # Quick check that it's the right dimensions
-        if(imgWidth + imgHeight != 1400):
+        if(imgWidth + imgHeight != (self.printHeight + self.printWidth)):
             raise Exception("Image was not 800x600 or 600x800")
-        if(imgWidth != 800):
+        if(imgWidth != self.printWidth):
             # Rotate the image
-            self.logMessage("Rotating")
+            logging.info("Rotating")
             self.myImage = self.myImage.rotate(-90, expand=True)
-        self.logMessage("New Image Size: W: %s, H: %s" % (self.myImage.size))
+        logging.info("New Image Size: W: %s, H: %s" % (self.myImage.size))
         imagePixels = self.myImage.getdata()
+        logging.info("Mode: %s" % (self.myImage.mode))
         arrayLen = len(imagePixels) * 3
-        self.logMessage("Encoded Array Length: %s" % arrayLen)
+        logging.info("Encoded Array Length: %s" % arrayLen)
         encodedBytes = [None] * arrayLen
         for h in range(self.printHeight):
             for w in range(self.printWidth):
-                r, g, b = imagePixels[(h * self.printWidth) + w]
+                r, g, b= imagePixels[(h * self.printWidth) + w]
                 redTarget = (((w * self.printHeight) * 3) +
                              (self.printHeight * 0)) + h
                 greenTarget = (((w * self.printHeight) * 3) +
@@ -84,11 +81,11 @@ class InstaxImage:
         Rotate, Resize and Crop the image, so that it is the correct
         dimensions for printing to the Instax SP-2.
         """
-        maxSize = 600, 800  # The Max Image size
+        maxSize = self.printHeight, self.printWidth  # The Max Image size
         rotatedImage = rotate_image(self.sourceImage)
         image_ratio = rotatedImage.size[0] / float(rotatedImage.size[1])
 
-        if(rotatedImage.size[0] + rotatedImage.size[1] == 1400):
+        if(rotatedImage.size[0] + rotatedImage.size[1] == (self.printHeight + self.printWidth)):
             img = rotatedImage
         else:
             if image_ratio == 1.0:
@@ -99,7 +96,7 @@ class InstaxImage:
         # Stip away any exif data.
         newImage = Image.new(img.mode, img.size)
         newImage.putdata(img.getdata())
-        self.myImage = newImage
+        self.myImage = pure_pil_alpha_to_color_v2(newImage, (255,255,255))
 
     def previewImage(self):
         """Preview the image."""
@@ -107,7 +104,7 @@ class InstaxImage:
 
     def saveImage(self, filename):
         """Save the image to the specified path."""
-        self.logMessage(("Saving Image to: ", filename))
+        logging.info(("Saving Image to: ", filename))
         self.myImage.save(filename, 'BMP', quality=100, optimise=True)
 
     def getBytes(self):
@@ -249,3 +246,20 @@ def crop_rectangle(source, size, crop_type='top'):
         img = source.resize((size[0], size[1]), Image.ANTIALIAS)
 
     return img
+
+def pure_pil_alpha_to_color_v2(image, color=(255, 255, 255)):
+    """Alpha composite an RGBA Image with a specified color.
+
+    Simpler, faster version than the solutions above.
+
+    Source: http://stackoverflow.com/a/9459208/284318
+
+    Keyword Arguments:
+    image -- PIL RGBA Image object
+    color -- Tuple r, g, b (default 255, 255, 255)
+
+    """
+    image.load()  # needed for split()
+    background = Image.new('RGB', image.size, color)
+    background.paste(image, mask=image.split()[3])  # 3 is the alpha channel
+    return background

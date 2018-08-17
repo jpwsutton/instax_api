@@ -18,6 +18,7 @@ Parameters:
 """
 import argparse
 import datetime
+import logging
 import instax
 
 
@@ -35,9 +36,10 @@ def remaining_type(x):
 parser = argparse.ArgumentParser()
 parser.add_argument("-v", "--verbose", action="store_true", default=False,
                     help="Print Verbose log messages to console.")
-parser.add_argument("-l", "--log",
-                    help="The location to store the JSON log,"
-                    "by default: ddmmyy-hhmmss-log.json")
+parser.add_argument("-D", "--debug", action="store_true", default=False,
+                        help="Logs extra debug data to log.")
+parser.add_argument("-l", "--log", action="store_true", default=False,
+                        help="Log information to log file ddmmyy-hhmmss-server.log")
 parser.add_argument("-o", "--host", default='0.0.0.0',
                     help="The Host IP to expose the server on.")
 parser.add_argument("-p", "--port", type=int, default=8080,
@@ -55,13 +57,33 @@ parser.add_argument("-t", "--total", type=int, default=20,
                     ", default 20")
 args = parser.parse_args()
 
+logLevel = logging.INFO
+if args.debug:
+    logLevel = logging.DEBUG
+
+logger = logging.getLogger('instax_server')
+logger.setLevel(logLevel)
+
+# Create Log Formatter
+formatter = logging.Formatter('%(asctime)s:%(name)s:%(levelname)s:%(message)s')
+
+# Create Console Handler
+ch = logging.StreamHandler()
+ch.setLevel(logLevel)
+ch.setFormatter(formatter)
+logger.addHandler(ch)
+
 # If Not specified, set the log file to a datestamp.
-if not args.log:
-    args.log = '{0:%Y-%m-%d.%H:%M:%S-log.json}'.format(datetime.datetime.now())
+if args.log:
+    logFilename = '{0:%Y-%m-%d.%H:%M:%S-server.log}'.format(datetime.datetime.now())
+    fh = logging.FileHandler(logFilename)
+    fh.setLevel(logLevel)
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
 
 
-testServer = instax.TestServer(verbose=args.verbose, log=args.log,
-                               host=args.host, port=args.port, dest=args.dest,
+testServer = instax.TestServer(host=args.host, 
+                               port=args.port, dest=args.dest,
                                battery=args.battery, remaining=args.remaining,
                                total=args.total)
 testServer.start()

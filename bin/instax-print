@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""Instax SP-2 Print Script.
+"""Instax SP Print Script.
 
 Author: James Sutton 2017 - jsutton.co.uk
 
 This can be used to print an image to a Fujifilm Instax SP-2 printer.
 Parameters:
- - Verbose (Default False)
  - JSON Log File (Default ddmmyy-hhmmss.json)
  - Image to print
  - Port (Default 8080)
@@ -14,43 +13,48 @@ Parameters:
 """
 import argparse
 import datetime
+import sys
 import instax
 try:
     import instax
 except:
     # We are most likely in development mode, import from parent.
     from .. import instax
+import logging
 
-quiet_mode = False
 
-def logToConsole(message, error=False, verbose=False):
-    """Log a message to the console"""
-    if (error is True) or (quiet_mode is False) or (verbose is True):
-        if message is None:
-            print()
-        else:
-            print(message)
+def logAndPrint(message):
+    print(message)
+    logging.info(message)
+
 
 def printPrinterInfo(info):
     """ Log Printer information"""
-    logToConsole("Model: %s" % info['model'])
-    logToConsole("Firmware: %s" % info['version']['firmware'])
-    logToConsole("Battery State: %s" % info['battery'])
-    logToConsole("Prints Remaining: %d" % info['printCount'])
-    logToConsole("Total Lifetime Prints: %d" % info['count'])
-    logToConsole("")
+    logAndPrint("Model: %s" % info['model'])
+    logAndPrint("Firmware: %s" % info['version']['firmware'])
+    logAndPrint("Battery State: %s" % info['battery'])
+    logAndPrint("Prints Remaining: %d" % info['printCount'])
+    logAndPrint("Total Lifetime Prints: %d" % info['count'])
+    logAndPrint("")
+
+#https://gist.github.com/vladignatyev/06860ec2040cb497f0f3
+def printProgress(count, total, status=''):
+    bar_len = 60
+    filled_len = int(round(bar_len * count / float(total)))
+    percents = round(100.0 * count / float(total), 1)
+    bar = '=' * filled_len + '-' * (bar_len - filled_len)
+    sys.stdout.write('[%s] %s%s ...%s\r' % (bar, percents, '%', status))
+    sys.stdout.flush()  # As suggested by Rom Ruben (see: http://stackoverflow.com/questions/3173320/text-progress-bar-in-the-console/27871113#comment50529068_27871113)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-V", "--version", action="store_true", default=False,
                         help="Prints the current version.")
-    parser.add_argument("-v", "--verbose", action="store_true", default=False,
-                        help="Print Verbose log messages to console.")
-    
+    parser.add_argument("-d", "--debug", action="store_true", default=False,
+                        help="Logs extra debug data to log.")
     parser.add_argument("-l", "--log", action="store_true", default=False,
-                        help="Save debug data to a log file,"
-                        "by default: ddmmyy-hhmmss-log.json")
+                        help="Log information to log file ddmmyy-hhmmss.log")
     parser.add_argument("-o", "--host", default='192.168.0.251',
                         help="The Host IP to connect to the server on.")
     parser.add_argument("-p", "--port", type=int, default=8080,
@@ -59,63 +63,67 @@ if __name__ == "__main__":
                         help="The pin code to use, default: 1111.")
     parser.add_argument("-t", "--timeout", type=int, default=10,
                         help="The timeout to use when communicating.")
-    parser.add_argument("-q", "--quiet", action="store_true", default=False,
-                        help="Runs in quiet mode and will only output errors if they occur.")
-    parser.add_argument("-S", "--instaxversion", type=int, default=2,
-                        help="The version of Instax Printer to use (1, 2 or 3). Default is 2.")
+    parser.add_argument("-v", "--instaxversion", type=int, default=2,
+                        help="The version of Instax Printer to use (1, 2 or 3). Default is 2 (SP-2).")
     parser.add_argument("image", help="The location of the image to print.")
     args = parser.parse_args()
 
     # Show version
     if args.version:
-        print("Instax Print - Version: %s" % instax.version)
+        logAndPrint("Instax Print - Version: %s" % instax.version)
         exit(0)
 
-    if args.quiet:
-        quiet_mode = True
 
     # If Not specified, set the log file to a datestamp.
     if args.log:
-        args.log = '{0:%Y-%m-%d.%H:%M:%S-log.json}'.format(datetime.datetime.now())
+        logFilename = '{0:%Y-%m-%d.%H:%M:%S.log}'.format(datetime.datetime.now())
+        logLevel = logging.INFO
+        if args.debug:
+            logLevel = logging.DEBUG
+        logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', filename=logFilename, level=logLevel)
 
-    logToConsole("--- Instax Printer Python Client ---")
-    logToConsole("")
+
+    logAndPrint("--- Instax Printer Python Client ---")
+    logAndPrint("")
     myInstax = None
 
     if args.instaxversion is 1:
-        logToConsole("Attempting to print to an Instax SP-1 printer.")
-        # TODO
+        logging.info("Attempting to print to an Instax SP-1 printer.")
+        # TODO - Need to find an SP-2 to test with.
     elif args.instaxversion is 2:
-        logToConsole("Attempting to print to an Instax SP-2 printer.")
+        logging.info("Attempting to print to an Instax SP-2 printer.")
         myInstax = instax.SP2(ip=args.host, port=args.port, pinCode=args.pin,
-                      timeout=args.timeout, verbose=args.verbose)
+                      timeout=args.timeout)
     elif args.instaxversion is 3:
-        logToConsole("Attempting to print to an Instax SP-3 printer.")
-        # TODO
+        logging.info("Attempting to print to an Instax SP-3 printer.")
+        # Warning, this does not work in production yet.
+        myInstax = instax.SP3(ip=args.host, port=args.port, pinCode=args.pin,
+                      timeout=args.timeout)
     else:
-        logToConsole("Invalid Instax printer version given", True)
+        logging.error("Invalid Instax printer version given")
         exit(1)
 
     # Attempt print
-    logToConsole("Connecting to Printer.")
+    logAndPrint("Connecting to Printer.")
     info = myInstax.getPrinterInformation()
     printPrinterInfo(info)
 
-    logToConsole("Printing Image: %s" % args.image)
+    logAndPrint("Printing Image: %s" % args.image)
     # Initialize The Instax Image
-    instaxImage = instax.InstaxImage(logCallback=logToConsole, type=args.instaxversion)
+    instaxImage = instax.InstaxImage(type=args.instaxversion)
     instaxImage.loadImage(args.image)
     instaxImage.convertImage()
     # Save a copy of the converted bitmap
-    # instaxImage.saveImage("test.bmp")
-    # instaxImage.previewImage()
+    #instaxImage.saveImage("test.bmp")
+    # Preview the image that is about to print
+    #instaxImage.previewImage()
     encodedImage = instaxImage.encodeImage()
-    myInstax.printPhoto(encodedImage)
-    logToConsole("Thank you for using instax-print!")
-    logToConsole(r"""
+    myInstax.printPhoto(encodedImage, printProgress)
+    logAndPrint("Thank you for using instax-print!")
+    logAndPrint(r"""
         \   /\
         )  ( ')
         (  /  )
-        \(__)|""")
+         \(___)|""")
 
 
