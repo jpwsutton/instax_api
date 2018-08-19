@@ -3,7 +3,7 @@
 [![Build Status](https://img.shields.io/travis/jpwsutton/instax_api/master.svg)](https://travis-ci.org/jpwsutton/instax_api)
 [![Coverage Status](https://img.shields.io/coveralls/jpwsutton/instax_api/master.svg)](https://coveralls.io/github/jpwsutton/instax_api?branch=master)
 
-This is an experimental Python Module to interact and print photos to the Fujifilm Instax SP-2 printer.
+This is a Python Module to interact and print photos to the Fujifilm Instax SP-2 and SP-3 printers.
 
 
 ## Install this library
@@ -16,28 +16,33 @@ pip3 install instax-api
 
 ## Usage
 
-This library is still in a developmental state and so your mileage may vary.
-
 ```
 $ instax-print --help
-usage: instax-print [-h] [-v] [-l LOG] [-o HOST] [-p PORT] [-i PIN]
-                    [-t TIMEOUT]
-                    image
+usage: instax-print [-h] [-i PIN] [-v {1,2,3}] image
 
 positional arguments:
   image                 The location of the image to print.
 
 optional arguments:
   -h, --help            show this help message and exit
-  -v, --verbose         Print Verbose log messages to console.
-  -l LOG, --log LOG     The location to store the JSON log,by default: ddmmyy-
-                        hhmmss-log.json
-  -o HOST, --host HOST  The Host IP to connect to the server on.
-  -p PORT, --port PORT  The port to connect to the server on.
   -i PIN, --pin PIN     The pin code to use, default: 1111.
-  -t TIMEOUT, --timeout TIMEOUT
-                        The timeout to use when communicating.
+  -v {1,2,3}, --version {1,2,3}
+                        The version of Instax Printer to use (1, 2 or 3).
+                        Default is 2 (SP-2).                       
 ```
+
+### Examples:
+
+ - Printing a Photo to an SP-2 printer: `instax-print myPhoto.jpg`
+ - Printing a Photo to an SP-3 printer: `instax-print myPhoto.jpg -v 3`
+ - Printing a Photo to a printer with a pin that is not the default (1111) `instax-print myPhoto.jpg -i 1234`
+
+### Hints and tips:
+ - Make sure you are connected to the correct wifi network, once the printer is turned on, there will be an SSID / WiFi network available that starts with `INSTAX-` followed by 8 numbers. You'll need to connect to this.
+ - If you have a static IP address set up on your computer, you'll need to turn on DHCP before attempting to print, the Instax printer will automatically assign you a new address once you connect.
+- Some Unix based operating systems may require you to use sudo in order to access the network.
+- The printer will automatically turn itself off after roughly 10 minutes of innactivity.
+- The instax-print utility will attempt to automatically rotate the image so that it either is correctly printed in portrait, or landscape with the thick bottom edge of the print on the left. If you wish to print your photos in a specific orientation that differs from this, then it's reccomended that you orient your photo in a tool like GIMP first, then strip out the rotation metadata. Once the rotation metadata has been stripped, the photo will need to be in a portrait orientation relative to the finished print (e.g. thick edge at the bottom). 
 
 ## Install Manually
 

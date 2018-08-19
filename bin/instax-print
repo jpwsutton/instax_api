@@ -50,29 +50,23 @@ def printProgress(count, total, status=''):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-V", "--version", action="store_true", default=False,
-                        help="Prints the current version.")
     parser.add_argument("-d", "--debug", action="store_true", default=False,
-                        help="Logs extra debug data to log.")
+                        help=argparse.SUPPRESS)
     parser.add_argument("-l", "--log", action="store_true", default=False,
-                        help="Log information to log file ddmmyy-hhmmss.log")
+                        help=argparse.SUPPRESS)
     parser.add_argument("-o", "--host", default='192.168.0.251',
-                        help="The Host IP to connect to the server on.")
+                        help=argparse.SUPPRESS)
     parser.add_argument("-p", "--port", type=int, default=8080,
-                        help="The port to connect to the server on.")
+                        help=argparse.SUPPRESS)
     parser.add_argument("-i", "--pin", type=int, default=1111,
                         help="The pin code to use, default: 1111.")
     parser.add_argument("-t", "--timeout", type=int, default=10,
-                        help="The timeout to use when communicating.")
-    parser.add_argument("-v", "--instaxversion", type=int, default=2,
+                        help=argparse.SUPPRESS)
+    parser.add_argument("-v", "--version", type=int, default=2,
+                        choices=['1', '2', '3'],
                         help="The version of Instax Printer to use (1, 2 or 3). Default is 2 (SP-2).")
     parser.add_argument("image", help="The location of the image to print.")
     args = parser.parse_args()
-
-    # Show version
-    if args.version:
-        logAndPrint("Instax Print - Version: %s" % instax.version)
-        exit(0)
 
 
     # If Not specified, set the log file to a datestamp.
@@ -88,14 +82,14 @@ if __name__ == "__main__":
     logAndPrint("")
     myInstax = None
 
-    if args.instaxversion is 1:
+    if args.version is 1:
         logging.info("Attempting to print to an Instax SP-1 printer.")
         # TODO - Need to find an SP-2 to test with.
-    elif args.instaxversion is 2:
+    elif args.version is 2:
         logging.info("Attempting to print to an Instax SP-2 printer.")
         myInstax = instax.SP2(ip=args.host, port=args.port, pinCode=args.pin,
                       timeout=args.timeout)
-    elif args.instaxversion is 3:
+    elif args.version is 3:
         logging.info("Attempting to print to an Instax SP-3 printer.")
         # Warning, this does not work in production yet.
         myInstax = instax.SP3(ip=args.host, port=args.port, pinCode=args.pin,
@@ -111,7 +105,7 @@ if __name__ == "__main__":
 
     logAndPrint("Printing Image: %s" % args.image)
     # Initialize The Instax Image
-    instaxImage = instax.InstaxImage(type=args.instaxversion)
+    instaxImage = instax.InstaxImage(type=args.version)
     instaxImage.loadImage(args.image)
     instaxImage.convertImage()
     # Save a copy of the converted bitmap

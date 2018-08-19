@@ -24,6 +24,22 @@ sudo ifconfig wlan0 192.168.0.251
 
 Then run: `./bin/testServer.py`
 
+## Hidden options in instax-print CLI client
+In order to make debugging and using the test server easier, there are some hidden options in the instax-print application that you can use, these include:
+
+```
+  -d, --debug           Logs extra debug data to log.
+  -l, --log             Log information to log file ddmmyy-hhmmss.log
+  -o HOST, --host HOST  The Host IP to connect to the server on.
+  -p PORT, --port PORT  The port to connect to the server on.
+  -t TIMEOUT, --timeout TIMEOUT
+                        The timeout to use when communicating.
+```
+
+For example, when using the test server, you can use the following command to print: `instax-print myImage.jpg -o localhost -l`
+
+The `-d / --debug` option will print a lot more data to the log file, specifically detailed dumps of every command / response sent or received by the client. This is handy when trying to identify issues in the packet library.
+
 ## Running tests
 Simply run the command: `py.test instax/tests/*.py`
 

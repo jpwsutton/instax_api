@@ -6,8 +6,8 @@ with open('README.md', 'rb') as readme_file:
     readme = readme_file.read().decode('utf-8')
 
 setup(name='instax_api',
-      version='0.4',
-      description='Fujifilm Instax SP2 Library',
+      version='0.5',
+      description='Fujifilm Instax SP2 & SP3 Library and CLI Utility',
       long_description=readme,
       url='https://github.com/jpwsutton/instax_api',
       author='James Sutton',
