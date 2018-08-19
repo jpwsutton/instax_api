@@ -17,12 +17,14 @@ import threading
 import logging
 
 
+
 class TestServer:
     """A Test Server for the Instax Library."""
 
     def __init__(self, host='0.0.0.0', port=8080,
-                 dest="images", battery=2, remaining=10, total=20):
+                 dest="images", battery=2, remaining=10, total=20, version=2):
         """Initialise Server."""
+        self.logger = logging.getLogger('instax_server')
         self.packetFactory = PacketFactory()
         self.host = host
         self.dest = dest
@@ -30,6 +32,11 @@ class TestServer:
         self.backlog = 5
         self.returnCode = Packet.RTN_E_RCV_FRAME
         self.ejecting = 0
+        if version in [2,3]:
+            self.version = version
+        else:
+            self.logger.warning("Invalid Instax SP version, defaulting to SP-2")
+            self.version = 2
         self.printingState = 0
         self.battery = battery
         self.printCount = total
@@ -42,12 +49,11 @@ class TestServer:
         self.socket.bind((self.host, self.port))
         signal.signal(signal.SIGINT, self.signal_handler)
         self.imageMap = {}
-        self.logger = logging.getLogger('instax_server')
 
     def start(self):
         """Start the Server."""
         self.socket.listen(self.backlog)
-        self.logger.info(('Server Listening on %s port %s' % (self.host, self.port)))
+        self.logger.info(('Instax SP-%d Server Listening on %s port %s' % (self.version, self.host, self.port)))
         while True:
             client, address = self.socket.accept()
             client.settimeout(60)
@@ -97,7 +103,7 @@ class TestServer:
         for seg_key in range(len(segments)):
             combined += segments[seg_key]
         self.logger.info("Combined image is %s bytes long" % len(combined))
-        instaxImage = InstaxImage()
+        instaxImage = InstaxImage(type=self.version)
         instaxImage.decodeImage(combined)
         timestr = time.strftime("%Y%m%d-%H%M%S")
         filename = timestr + ".bmp"
@@ -191,7 +197,7 @@ class TestServer:
         """Process a model name command."""
         sessionTime = decodedPacket.header['sessionTime']
         resPacket = ModelNameCommand(Packet.MESSAGE_MODE_RESPONSE,
-                                     modelName='SP-2')
+                                     modelName= ("SP-%d" % self.version))
         encodedResponse = resPacket.encodeResponse(sessionTime,
                                                    self.returnCode,
                                                    self.ejecting,

@@ -33,6 +33,10 @@ class InstaxImage:
             # Rotate the image
             logging.info("Rotating")
             self.myImage = self.myImage.rotate(-90, expand=True)
+        if (self.printWidth == self.printHeight):
+            # Square images are a bit tricky, we have to assume they are oriented correctly
+            logging.info("Rotating Square Image")
+            self.myImage = self.myImage.rotate(-90, expand=True)
         logging.info("New Image Size: W: %s, H: %s" % (self.myImage.size))
         imagePixels = self.myImage.getdata()
         logging.info("Mode: %s" % (self.myImage.mode))

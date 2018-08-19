@@ -39,6 +39,7 @@ def printPrinterInfo(info):
 
 #https://gist.github.com/vladignatyev/06860ec2040cb497f0f3
 def printProgress(count, total, status=''):
+    logging.info(status)
     bar_len = 60
     filled_len = int(round(bar_len * count / float(total)))
     percents = round(100.0 * count / float(total), 1)
@@ -76,7 +77,7 @@ if __name__ == "__main__":
 
     # If Not specified, set the log file to a datestamp.
     if args.log:
-        logFilename = '{0:%Y-%m-%d.%H:%M:%S.log}'.format(datetime.datetime.now())
+        logFilename = '{0:%Y-%m-%d.%H-%M-%S.log}'.format(datetime.datetime.now())
         logLevel = logging.INFO
         if args.debug:
             logLevel = logging.DEBUG

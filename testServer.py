@@ -55,6 +55,8 @@ parser.add_argument("-r", "--remaining", type=remaining_type, default=10,
 parser.add_argument("-t", "--total", type=int, default=20,
                     help="The total number of prints in the printers lifetime"
                     ", default 20")
+parser.add_argument("-V", "--version", type=int, default=2,
+                    help="The Instax SP-* version, 2 or 3, default is 2")
 args = parser.parse_args()
 
 logLevel = logging.INFO
@@ -85,5 +87,5 @@ if args.log:
 testServer = instax.TestServer(host=args.host, 
                                port=args.port, dest=args.dest,
                                battery=args.battery, remaining=args.remaining,
-                               total=args.total)
+                               total=args.total, version=args.version)
 testServer.start()

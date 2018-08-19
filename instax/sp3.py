@@ -27,7 +27,7 @@ class SP3:
 
     def connect(self):
         """Connect to a printer."""
-        logging.info("Connecting to Instax SP-2 with timeout of: %s" % self.timeout)
+        logging.info("Connecting to Instax SP-3 with timeout of: %s on: tcp://%s:%d" % (self.timeout, self.ip, self.port))
         self.comms = SocketClientThread()
         self.comms.start()
         self.comms.cmd_q.put(ClientCommand(ClientCommand.CONNECT,
@@ -221,7 +221,7 @@ class SP3:
         # Reset the Printer
         time.sleep(1)
         self.connect()
-        progress(30, progressTotal, status='Reseting Printer.                         ')
+        progress(30, progressTotal, status='Resetting Printer.                         ')
         resp = self.sendResetCommand()
         self.close()
 
@@ -230,7 +230,7 @@ class SP3:
         self.connect()
         progress(40, progressTotal, status='About to send Image.                       ')
         resp = self.sendPrepImageCommand(16, 0, 1920000)
-        for segment in range(24):
+        for segment in range(32):
             start = segment * 60000
             end = start + 60000
             segmentBytes = imageBytes[start:end]
@@ -239,7 +239,6 @@ class SP3:
         resp = self.sendT83Command()
         resp.printDebug()
         self.close()
-        exit()
         progress(70, progressTotal, status='Image Print Started.                       ')
         # Send Print State Req
         time.sleep(1)

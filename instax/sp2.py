@@ -223,7 +223,7 @@ class SP2:
         # Reset the Printer
         time.sleep(1)
         self.connect()
-        progress(30, progressTotal, status='Reseting Printer.                         ')
+        progress(30, progressTotal, status='Resetting Printer.                         ')
         self.sendResetCommand()
         self.close()
 
