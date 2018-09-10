@@ -63,7 +63,7 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--timeout", type=int, default=10,
                         help=argparse.SUPPRESS)
     parser.add_argument("-v", "--version", type=int, default=2,
-                        choices=['1', '2', '3'],
+                        choices=[1,2,3],
                         help="The version of Instax Printer to use (1, 2 or 3). Default is 2 (SP-2).")
     parser.add_argument("image", help="The location of the image to print.")
     args = parser.parse_args()
