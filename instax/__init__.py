@@ -9,4 +9,4 @@ from .packet import PacketFactory, Packet, SpecificationsCommand, \
                     Type195Command, LockStateCommand
 
 
-version = "0.5"
+version = "0.7"
