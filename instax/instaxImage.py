@@ -28,7 +28,7 @@ class InstaxImage:
         logging.info("Initial Image Size: W: %s, H: %s" % (imgWidth, imgHeight))
         # Quick check that it's the right dimensions
         if(imgWidth + imgHeight != (self.printHeight + self.printWidth)):
-            raise Exception("Image was not 800x600 or 600x800")
+            raise Exception("Image was not 800x600 or 600x800, it was : w:%d, h:%d" % (imgWidth, imgHeight))
         if(imgWidth != self.printWidth):
             # Rotate the image
             logging.info("Rotating")
@@ -256,7 +256,7 @@ def pure_pil_alpha_to_color_v2(image, color=(255, 255, 255)):
 
     Simpler, faster version than the solutions above.
 
-    Source: http://stackoverflow.com/a/9459208/284318
+    Source: 098
 
     Keyword Arguments:
     image -- PIL RGBA Image object
@@ -265,5 +265,5 @@ def pure_pil_alpha_to_color_v2(image, color=(255, 255, 255)):
     """
     image.load()  # needed for split()
     background = Image.new('RGB', image.size, color)
-    background.paste(image, mask=image.split()[3])  # 3 is the alpha channel
+    background.paste(image)  # 3 is the alpha channel
     return background
