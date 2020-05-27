@@ -60,6 +60,8 @@ if __name__ == "__main__":
                         help=argparse.SUPPRESS)
     parser.add_argument("-i", "--pin", type=int, default=1111,
                         help="The pin code to use, default: 1111.")
+    parser.add_argument("-e", "--preview", action="store_true", default=False,
+                        help="Show a preview of the image before it is printed, then exit.")
     parser.add_argument("-t", "--timeout", type=int, default=10,
                         help=argparse.SUPPRESS)
     parser.add_argument("-v", "--version", type=int, default=2,
@@ -98,27 +100,37 @@ if __name__ == "__main__":
         logging.error("Invalid Instax printer version given")
         exit(1)
 
-    # Attempt print
-    logAndPrint("Connecting to Printer.")
-    info = myInstax.getPrinterInformation()
-    printPrinterInfo(info)
+    if args.preview is True:
+        # Going to preview the image as it will be printed
+        logAndPrint("Previewing Image")
+        instaxImage = instax.InstaxImage(type=args.version)
+        instaxImage.loadImage(args.image)
+        instaxImage.convertImage()
+        instaxImage.previewImage()
+        logAndPrint("Preview complete, exiting.")
+        exit(0)
+    else:
+        # Attempt print
+        logAndPrint("Connecting to Printer.")
+        info = myInstax.getPrinterInformation()
+        printPrinterInfo(info)
 
-    logAndPrint("Printing Image: %s" % args.image)
-    # Initialize The Instax Image
-    instaxImage = instax.InstaxImage(type=args.version)
-    instaxImage.loadImage(args.image)
-    instaxImage.convertImage()
-    # Save a copy of the converted bitmap
-    #instaxImage.saveImage("test.bmp")
-    # Preview the image that is about to print
-    #instaxImage.previewImage()
-    encodedImage = instaxImage.encodeImage()
-    myInstax.printPhoto(encodedImage, printProgress)
-    logAndPrint("Thank you for using instax-print!")
-    logAndPrint(r"""
-        \   /\
-        )  ( ')
-        (  /  )
-         \(___)|""")
+        logAndPrint("Printing Image: %s" % args.image)
+        # Initialize The Instax Image
+        instaxImage = instax.InstaxImage(type=args.version)
+        instaxImage.loadImage(args.image)
+        instaxImage.convertImage()
+        # Save a copy of the converted bitmap
+        #instaxImage.saveImage("test.bmp")
+        # Preview the image that is about to print
+        #instaxImage.previewImage()
+        encodedImage = instaxImage.encodeImage()
+        myInstax.printPhoto(encodedImage, printProgress)
+        logAndPrint("Thank you for using instax-print!")
+        logAndPrint(r"""
+            \   /\
+            )  ( ')
+            (  /  )
+            \(___)|""")
 
 
