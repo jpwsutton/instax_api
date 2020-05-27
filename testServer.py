@@ -84,7 +84,7 @@ if args.log:
     logger.addHandler(fh)
 
 
-testServer = instax.TestServer(host=args.host, 
+testServer = instax.DebugServer(host=args.host, 
                                port=args.port, dest=args.dest,
                                battery=args.battery, remaining=args.remaining,
                                total=args.total, version=args.version)

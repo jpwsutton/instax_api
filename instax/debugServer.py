@@ -18,7 +18,7 @@ import logging
 
 
 
-class TestServer:
+class DebugServer:
     """A Test Server for the Instax Library."""
 
     def __init__(self, host='0.0.0.0', port=8080,
@@ -59,6 +59,10 @@ class TestServer:
             client.settimeout(60)
             threading.Thread(target=self.listenToClient,
                              args=(client, address)).start()
+    
+    def getPort(self):
+        self.logger.info(self.socket.getsockname())
+        return self.socket.getsockname()[1]
 
     def listenToClient(self, client, address):
         """Interact with client."""

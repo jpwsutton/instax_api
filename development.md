@@ -22,7 +22,7 @@ sudo hostapd /etc/hostapd/hostapd.conf (This will keep running so do it in anoth
 sudo ifconfig wlan0 192.168.0.251
 ```
 
-Then run: `./bin/testServer.py`
+Then run: `./bin/debugServer.py`
 
 ## Hidden options in instax-print CLI client
 In order to make debugging and using the test server easier, there are some hidden options in the instax-print application that you can use, these include:
