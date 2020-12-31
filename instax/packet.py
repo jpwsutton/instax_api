@@ -1,7 +1,7 @@
 """Fujifilm Instax SP-2 Packet Library.
 
 This packet library can be used to encode and decode packets to be sent to
-or recieved from a Fujifilm Instax SP-2. It is designed to be used with the
+or recieved from a Fujifilm Instax SP-1,2 & 3. It is designed to be used with the
 instax_api Python Library.
 """
 import logging
