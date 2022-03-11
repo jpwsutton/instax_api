@@ -1,4 +1,4 @@
-Pillow==8.2.0
+Pillow==9.0.1
 pycodestyle==2.3.1
 pytest==3.2.1
 pytest-cache==1.0
