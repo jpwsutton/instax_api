@@ -49,7 +49,7 @@ tests-no-zope = ["cloudpickle", "cloudpickle", "hypothesis", "hypothesis", "mypy
 name = "certifi"
 version = "2022.12.7"
 description = "Python package for providing Mozilla's CA Bundle."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
@@ -73,7 +73,7 @@ files = [
 name = "charset-normalizer"
 version = "2.1.1"
 description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6.0"
 files = [
@@ -115,7 +115,7 @@ files = [
 name = "coverage"
 version = "6.5.0"
 description = "Code coverage measurement for Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -181,7 +181,7 @@ toml = ["tomli"]
 name = "coveralls"
 version = "3.3.1"
 description = "Show coverage stats online via coveralls.io"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">= 3.5"
 files = [
@@ -213,7 +213,7 @@ files = [
 name = "docopt"
 version = "0.6.2"
 description = "Pythonic argument parser, that will make you smile"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 files = [
@@ -299,7 +299,7 @@ license = ["ukkonen"]
 name = "idna"
 version = "3.4"
 description = "Internationalized Domain Names in Applications (IDNA)"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 files = [
@@ -617,7 +617,7 @@ files = [
 name = "requests"
 version = "2.28.1"
 description = "Python HTTP for Humans."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7, <4"
 files = [
@@ -704,7 +704,7 @@ files = [
 name = "urllib3"
 version = "1.26.13"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 files = [
@@ -756,4 +756,4 @@ dev = ["black (>=19.3b0)", "pytest (>=4.6.2)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "e552654c9ba108f9319051e7b371a09b38aaa33b3c38e388b9b3158a459ec146"
+content-hash = "1b8addf7d83faccfc1e6be0f4a791063c5d3e69aa4a2f88309324f3daa2e6db8"

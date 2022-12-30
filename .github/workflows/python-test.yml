@@ -61,5 +61,10 @@ jobs:
       - name: Run tests
         run: |
           source .venv/bin/activate
-          pytest instax --cov
+          coverage run --source instax -m pytest instax --doctest-modules
           coverage report
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
