@@ -1,22 +1,23 @@
-import sys
+from pathlib import Path
+
 from setuptools import setup
 
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
 
-with open('README.md', 'rb') as readme_file:
-    readme = readme_file.read().decode('utf-8')
-
-setup(name='instax_api',
-      version='0.7',
-      description='Fujifilm Instax SP2 & SP3 Library and CLI Utility',
-      long_description=readme,
-      url='https://github.com/jpwsutton/instax_api',
-      author='James Sutton',
-      author_email='james@jsutton.co.uk',
-      license='MIT',
-      keywords='instax',
-      packages=['instax'],
-      install_requires=[
-          'Pillow',
-      ],
-      scripts=['bin/instax-print'],
-      zip_safe=False)
+setup(
+    name="instax_api",
+    version="0.8.0",
+    description="Fujifilm Instax SP2 & SP3 Library and CLI Utility",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/jpwsutton/instax_api",
+    author="James Sutton",
+    author_email="james@jsutton.co.uk",
+    license="MIT",
+    keywords="instax",
+    packages=["instax"],
+    install_requires=[
+        "Pillow",
+    ],
+)

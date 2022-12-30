@@ -3,11 +3,13 @@ Instax SP* Socket Tests
 
 James Sutton 2020
 """
-from instax import DebugServer, SP2
-import time
-import unittest
 import threading
+import unittest
+
 import pytest
+
+from instax.debugServer import DebugServer
+from instax.sp2 import SP2
 
 
 class SocketTests(unittest.TestCase):
@@ -16,11 +18,11 @@ class SocketTests(unittest.TestCase):
     """
 
     @pytest.fixture(autouse=True)
-    def test_server(self):
-        server = DebugServer(host='0.0.0.0', port=0)
+    def debug_server(self):
+        server = DebugServer(host="0.0.0.0", port=0)
         self.server_port = server.getPort()
         print(f"Server running on port {self.server_port}")
-       
+
         thread = threading.Thread(target=server.start)
         thread.daemon = True
         thread.start()
@@ -29,11 +31,12 @@ class SocketTests(unittest.TestCase):
     def test_send_recieve_command(self):
         sp2 = SP2(ip="0.0.0.0", port=self.server_port)
         sp2.connect()
-        model_name = sp2.getPrinterModelName().payload['modelName']
+        model_name = sp2.getPrinterModelName().payload["modelName"]
         print(f"Model name returned was: {model_name}")
         sp2.close()
-        self.assertEqual('SP-2', model_name)
+        self.assertEqual("SP-2", model_name)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
 
     unittest.main()

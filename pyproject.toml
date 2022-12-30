@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "instax-api"
+version = "0.8.0"
+description = "A Python module and app to print photos on the Fujifim Instax Printers"
+authors = ["James Sutton"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "instax"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+Pillow = "^9.3.0"
+loguru = "^0.6.0"
+
+[tool.poetry.group.dev.dependencies]
+coveralls = "^3.3.1"
+gitlint = "0.17.0"
+pre-commit = "2.20.0"
+pytest = "7.1.2"
+pytest-cov = "3.0.0"
+
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

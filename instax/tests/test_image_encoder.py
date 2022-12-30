@@ -4,7 +4,8 @@ Instax SP2 Test File.
 @jpwsutton 2016/17
 """
 import unittest
-import instax
+
+from instax.instaxImage import InstaxImage
 
 
 class ImageTests(unittest.TestCase):
@@ -14,13 +15,13 @@ class ImageTests(unittest.TestCase):
         """Test Decoding and then Encoding a premade instax image."""
         encodedImageFile = "instax/tests/testEncodedImage.instax"
         rawInstaxBytes = None
-        with open(encodedImageFile, 'rb') as infile:
+        with open(encodedImageFile, "rb") as infile:
             rawBytes = infile.read()
             rawInstaxBytes = bytearray(rawBytes)
         self.assertEqual(len(rawInstaxBytes), 1440000)
 
         # Initialize The Instax Image
-        instaxImage = instax.InstaxImage()
+        instaxImage = InstaxImage()
 
         # Decode the Image from the Instax Byte Array
         instaxImage.decodeImage(rawInstaxBytes)
@@ -31,12 +32,11 @@ class ImageTests(unittest.TestCase):
         self.assertEqual(len(encodedImage), 1440000)
 
         for x in range(1440000):
-            if(rawInstaxBytes[x] != encodedImage[x]):
-                message = ("Mismatch: Index: %s: %s != %s" %
-                           (x, rawInstaxBytes[x], encodedImage[x]))
+            if rawInstaxBytes[x] != encodedImage[x]:
+                message = f"Mismatch: Index: {x}: {rawInstaxBytes[x]} != {encodedImage[x]}"
                 self.fail(message, True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     unittest.main()
