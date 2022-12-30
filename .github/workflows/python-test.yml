@@ -61,7 +61,7 @@ jobs:
       - name: Run tests
         run: |
           source .venv/bin/activate
-          coverage run --source instax -m pytest instax --doctest-modules --cov-report lcov
+          pytest --cov-report=lcov:coverage/lcov.info --cov=instax
           coverage report
 
       - name: Coveralls
