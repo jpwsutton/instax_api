@@ -1,3 +1,5 @@
+name: "Build, Lint and Test"
+
 on:
   push:
     branches: [main]
@@ -55,6 +57,13 @@ jobs:
       #----------------------------------------------
       - name: Install project
         run: poetry install --no-interaction
+
+      #----------------------------------------------
+      #              lint project
+      #----------------------------------------------
+      - name: Lint Project
+        run: pre-commit run --all-files
+      
       #----------------------------------------------
       #              run test suite
       #----------------------------------------------
