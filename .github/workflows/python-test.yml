@@ -62,7 +62,7 @@ jobs:
       #              lint project
       #----------------------------------------------
       - name: Lint Project
-        run: pre-commit run --all-files
+        uses: pre-commit/action@v3.0.0
       
       #----------------------------------------------
       #              run test suite
