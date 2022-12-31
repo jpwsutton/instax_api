@@ -1,0 +1,250 @@
+[
+    {
+        "bytes": "24c4 0014 63fb 4a6b 0457 0000 0000 0001 fc94 0d0a",
+        "header": {
+            "startByte": 36,
+            "cmdByte": 196,
+            "packetLength": 20,
+            "sessionTime": 1677412971,
+            "password": 1111
+        },
+        "payload": {
+            "cmdNumber": 1
+        }
+    },
+    {
+        "bytes": "2ac4 0018 63fb 4a6b 0000 0000 0000 0034 0001 0002 fcaf 0d0a",
+        "header": {
+            "startByte": 42,
+            "cmdByte": 196,
+            "packetLength": 24,
+            "sessionTime": 1677412971,
+            "returnCode": 0,
+            "unknown1": 0,
+            "ejecting": 0,
+            "battery": 3,
+            "printCount": 4
+        },
+        "payload": {
+            "cmdNumber": 1,
+            "respNumber": 2
+        }
+    },
+    {
+        "bytes": "24c4 0014 63fb 4a6b 0457 0000 0000 0002 fc93 0d0a",
+        "header": {
+            "startByte": 36,
+            "cmdByte": 196,
+            "packetLength": 20,
+            "sessionTime": 1677412971,
+            "password": 1111
+        },
+        "payload": {
+            "cmdNumber": 2
+        }
+    },
+    {
+        "bytes": "2ac4 0018 63fb 4a6b 0000 0000 0000 0034 0002 0002 fcae 0d0a",
+        "header": {
+            "startByte": 42,
+            "cmdByte": 196,
+            "packetLength": 24,
+            "sessionTime": 1677412971,
+            "returnCode": 0,
+            "unknown1": 0,
+            "ejecting": 0,
+            "battery": 3,
+            "printCount": 4
+        },
+        "payload": {
+            "cmdNumber": 2,
+            "respNumber": 2
+        }
+    },
+    {
+        "bytes": "24c4 0014 63fb 4a6b 0457 0000 0000 0003 fc92 0d0a",
+        "header": {
+            "startByte": 36,
+            "cmdByte": 196,
+            "packetLength": 20,
+            "sessionTime": 1677412971,
+            "password": 1111
+        },
+        "payload": {
+            "cmdNumber": 3
+        }
+    },
+    {
+        "bytes": "2ac4 0018 63fb 4a6b 0000 0000 0000 0034 0003 0002 fcad 0d0a",
+        "header": {
+            "startByte": 42,
+            "cmdByte": 196,
+            "packetLength": 24,
+            "sessionTime": 1677412971,
+            "returnCode": 0,
+            "unknown1": 0,
+            "ejecting": 0,
+            "battery": 3,
+            "printCount": 4
+        },
+        "payload": {
+            "cmdNumber": 3,
+            "respNumber": 2
+        }
+    },
+    {
+        "bytes": "24c4 0014 63fb 4a6b 0457 0000 0000 0004 fc91 0d0a",
+        "header": {
+            "startByte": 36,
+            "cmdByte": 196,
+            "packetLength": 20,
+            "sessionTime": 1677412971,
+            "password": 1111
+        },
+        "payload": {
+            "cmdNumber": 4
+        }
+    },
+    {
+        "bytes": "2ac4 0018 63fb 4a6b 0000 0000 0000 0034 0004 0001 fcad 0d0a",
+        "header": {
+            "startByte": 42,
+            "cmdByte": 196,
+            "packetLength": 24,
+            "sessionTime": 1677412971,
+            "returnCode": 0,
+            "unknown1": 0,
+            "ejecting": 0,
+            "battery": 3,
+            "printCount": 4
+        },
+        "payload": {
+            "cmdNumber": 4,
+            "respNumber": 1
+        }
+    },
+    {
+        "bytes": "24c4 0014 63fb 4a6b 0457 0000 0000 0005 fc90 0d0a",
+        "header": {
+            "startByte": 36,
+            "cmdByte": 196,
+            "packetLength": 20,
+            "sessionTime": 1677412971,
+            "password": 1111
+        },
+        "payload": {
+            "cmdNumber": 5
+        }
+    },
+    {
+        "bytes": "2ac4 0018 63fb 4a6b 0000 0000 0000 0034 0005 0001 fcac 0d0a",
+        "header": {
+            "startByte": 42,
+            "cmdByte": 196,
+            "packetLength": 24,
+            "sessionTime": 1677412971,
+            "returnCode": 0,
+            "unknown1": 0,
+            "ejecting": 0,
+            "battery": 3,
+            "printCount": 4
+        },
+        "payload": {
+            "cmdNumber": 5,
+            "respNumber": 1
+        }
+    },
+    {
+        "bytes": "24c4 0014 63fb 4a6b 0457 0000 0000 0006 fc8f 0d0a",
+        "header": {
+            "startByte": 36,
+            "cmdByte": 196,
+            "packetLength": 20,
+            "sessionTime": 1677412971,
+            "password": 1111
+        },
+        "payload": {
+            "cmdNumber": 6
+        }
+    },
+    {
+        "bytes": "2ac4 0018 63fb 4a6b 0000 0000 0000 0034 0006 0000 fcac 0d0a",
+        "header": {
+            "startByte": 42,
+            "cmdByte": 196,
+            "packetLength": 24,
+            "sessionTime": 1677412971,
+            "returnCode": 0,
+            "unknown1": 0,
+            "ejecting": 0,
+            "battery": 3,
+            "printCount": 4
+        },
+        "payload": {
+            "cmdNumber": 6,
+            "respNumber": 0
+        }
+    },
+    {
+        "bytes": "24c4 0014 63fb 4a6b 0457 0000 0000 0007 fc8e 0d0a",
+        "header": {
+            "startByte": 36,
+            "cmdByte": 196,
+            "packetLength": 20,
+            "sessionTime": 1677412971,
+            "password": 1111
+        },
+        "payload": {
+            "cmdNumber": 7
+        }
+    },
+    {
+        "bytes": "2ac4 0018 63fb 4a6b 0000 0000 0000 0034 0007 0000 fcab 0d0a",
+        "header": {
+            "startByte": 42,
+            "cmdByte": 196,
+            "packetLength": 24,
+            "sessionTime": 1677412971,
+            "returnCode": 0,
+            "unknown1": 0,
+            "ejecting": 0,
+            "battery": 3,
+            "printCount": 4
+        },
+        "payload": {
+            "cmdNumber": 7,
+            "respNumber": 0
+        }
+    },
+    {
+        "bytes": "24c4 0014 63fb 4a6b 0457 0000 0000 0008 fc8d 0d0a",
+        "header": {
+            "startByte": 36,
+            "cmdByte": 196,
+            "packetLength": 20,
+            "sessionTime": 1677412971,
+            "password": 1111
+        },
+        "payload": {
+            "cmdNumber": 8
+        }
+    },
+    {
+        "bytes": "2ac4 0018 63fb 4a6b 0000 0000 0000 0034 0008 0000 fcaa 0d0a",
+        "header": {
+            "startByte": 42,
+            "cmdByte": 196,
+            "packetLength": 24,
+            "sessionTime": 1677412971,
+            "returnCode": 0,
+            "unknown1": 0,
+            "ejecting": 0,
+            "battery": 3,
+            "printCount": 4
+        },
+        "payload": {
+            "cmdNumber": 8,
+            "respNumber": 0
+        }
+    }
+]

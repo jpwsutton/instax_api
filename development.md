@@ -1,13 +1,13 @@
 # Development Guide
 
 
-## Developing using the Virtualenv environment
+## Developing using Poetry
 
-* Make sure you have virtualenv installed : `pip3 install virtualenv`.
-* If you haven't created it yet, create the virtual environment: `virtualenv env -p python3`.
-* Activate the environment: `source env/bin/activate`.
-* Install packages from requirements.txt: `pip3 install -r requirements.txt --upgrade`.
-* When you are finished, just use `deactivate` to end your session.
+* Install poetry on your development machine: https://python-poetry.org/docs/
+* Run `poetry shell` to launch the virtual environment.
+* Run `poetry install` to download all main and dev dependencies.
+* Run `pre-commit install` and then `pre-commit install --hook-type commit-msg` to set up the pre-commit checks.
+* When you are finished, just use `exit` to end your session.
 
 ## Running the Test Server
 
@@ -22,7 +22,7 @@ sudo hostapd /etc/hostapd/hostapd.conf (This will keep running so do it in anoth
 sudo ifconfig wlan0 192.168.0.251
 ```
 
-Then run: `./bin/debugServer.py`
+Then run: `python3 -m instax.debugServer`
 
 ## Hidden options in instax-print CLI client
 In order to make debugging and using the test server easier, there are some hidden options in the instax-print application that you can use, these include:
@@ -36,12 +36,12 @@ In order to make debugging and using the test server easier, there are some hidd
                         The timeout to use when communicating.
 ```
 
-For example, when using the test server, you can use the following command to print: `instax-print myImage.jpg -o localhost -l`
+For example, when using the test server, you can use the following command to print: `python3 -m instax.print myImage.jpg -o localhost -l`
 
 The `-d / --debug` option will print a lot more data to the log file, specifically detailed dumps of every command / response sent or received by the client. This is handy when trying to identify issues in the packet library.
 
 ## Running tests
-Simply run the command: `py.test instax/tests/*.py`
+Simply run the command: `python3 -m pytest instax`
 
 
 ## Inspecting Packets in Wireshark
